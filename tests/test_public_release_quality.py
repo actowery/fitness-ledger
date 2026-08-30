@@ -44,6 +44,7 @@ class PublicReleaseQualityTests(unittest.TestCase):
         text = contract.read_text(encoding="utf-8")
         for required in ("current-version guard", "No partial mutation", "Fitness_Ledger_Nutrition_Ledger.json"):
             self.assertIn(required, text)
+        self.assertIn("never duplicate or rename", text)
         fitness = (ROOT / "skills" / "fitness-sync" / "SKILL.md").read_text(encoding="utf-8")
         self.assertIn("Library persistence contract", fitness)
 
