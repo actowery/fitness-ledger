@@ -13,7 +13,7 @@ Use this skill when the user wants to log, correct, inspect, or summarize their 
 - Use the existing Library identity and current version when reading. Never create a duplicate copy when the canonical file already exists.
 - Read the canonical ledger before every report or mutation; do not rely on search snippets or a cached state file alone.
 - For a mutation, preserve the ledger's Library identity and replace that same Library file only after validation and state reconciliation succeed.
-- Treat `Battle_Mage_Nutrition_Ledger.json` as canonical history and `Battle_Mage_Nutrition_Current_State.json` as rebuildable cache. The workbook is a reporting projection, not the operational source of truth.
+- Treat `Fitness_Ledger_Nutrition_Ledger.json` as canonical history and `Fitness_Ledger_Nutrition_Current_State.json` as rebuildable cache. The workbook is a reporting projection, not the operational source of truth.
 - If a required Library file cannot be resolved, ask the user to select or upload it. Do not silently create an unrelated local ledger.
 
 ## Core rules
