@@ -214,6 +214,27 @@ def validate_sync_time(value):
     return value
 
 
+def scheduled_sync_task_config(ledger):
+    """Return the host-automation contract for the daily combined sync."""
+    timezone = timezone_name_for(ledger)
+    sync = ledger.get("sync", {})
+    sync_time = validate_sync_time(sync.get("daily_sync_time_local", DEFAULT_DAILY_SYNC_TIME_LOCAL))
+    return {
+        "title": "Fitness Ledger Daily Sync",
+        "timing_mode": "exact_schedule",
+        "default_timezone": timezone,
+        "sync_time_local": sync_time,
+        "schedule": "BEGIN:VEVENT\nRRULE:FREQ=DAILY\nEND:VEVENT",
+        "prompt": (
+            "Run the combined Fitness Ledger synchronization for the current local day. "
+            "Pull nutrition, Caliber workouts, Apple Health workouts, and Apple Health activity. "
+            "Reconcile sources, keep raw observations, use Apple Health as canonical for steps, "
+            "and report a clear success or failure. Do not publish derived fitness facts from "
+            "incomplete source responses. Run this even when there are no workouts."
+        ),
+    }
+
+
 def initialize_ledger(timezone, targets=None, sources=None, sync_time=DEFAULT_DAILY_SYNC_TIME_LOCAL):
     """Create a minimal, explicit local ledger without credentials or live connections."""
     template = {"timezone": timezone}
@@ -224,7 +245,7 @@ def initialize_ledger(timezone, targets=None, sources=None, sync_time=DEFAULT_DA
         source: {"status": "configured", "configured_at": now_iso(template)}
         for source in (sources or [])
     }
-    return {
+    ledger = {
         "schema_version": "1.0.0",
         "tracker_id": "nutrition-ledger",
         "timezone": timezone,
@@ -241,6 +262,8 @@ def initialize_ledger(timezone, targets=None, sources=None, sync_time=DEFAULT_DA
         "food_master": [],
         "audit_log": [{"event": "ledger_initialized", "at": now_iso(template)}],
     }
+    ledger["sync"]["automation"] = scheduled_sync_task_config(ledger)
+    return ledger
 
 
 def nutrient_fields(ledger):
@@ -551,7 +574,7 @@ def main():
         )
         state = rebuild(ledger, args.state, current_local_date(ledger))
         atomic_write(args.ledger, ledger)
-        print(json.dumps({"ok": True, "initialized": True, "timezone": ledger["timezone"], "targets": ledger["targets"], "source_adapters": ledger["source_adapters"], "state": state}, indent=2)); return
+        print(json.dumps({"ok": True, "initialized": True, "timezone": ledger["timezone"], "targets": ledger["targets"], "source_adapters": ledger["source_adapters"], "sync": ledger["sync"], "state": state}, indent=2)); return
     ledger = load(args.ledger)
 
     if args.command == "today":
