@@ -58,6 +58,14 @@ Data quality
 Active entries only. Unknown means untracked, not zero.""")
         self.assertNotIn("protein credit", report.lower())
 
+    def test_progress_uses_personal_targets_not_generic_daily_values(self):
+        report = tracker.render_daily_report(self.ledger(), "2026-08-30", view="panel")
+
+        self.assertIn("Calories: 439 / 1,900 kcal (1,461 remaining)", report)
+        self.assertIn("Protein: 12.9 / 160.0 g (147.1 remaining)", report)
+        self.assertNotIn("%", report)
+        self.assertNotIn("Daily Value", report)
+
     def test_foods_view_reuses_exact_meal_and_food_grammar(self):
         report = tracker.render_daily_report(self.ledger(), "2026-08-30", view="foods")
 
