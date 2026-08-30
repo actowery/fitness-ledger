@@ -4,9 +4,9 @@ This plugin uses ChatGPT Library as its persistence boundary. The conversation i
 
 ## Canonical files
 
-- `Battle_Mage_Nutrition_Ledger.json` is the canonical nutrition history, food master, provenance, targets, and audit log.
-- `Battle_Mage_Nutrition_Current_State.json` is a rebuildable current-day cache and must never be treated as authoritative by itself.
-- `Battle_Mage_Nutrition_Weight_Tracker.xlsx` is a reporting projection. It is not the operational source of truth.
+- `Fitness_Ledger_Nutrition_Ledger.json` is the canonical nutrition history, food master, provenance, targets, and audit log.
+- `Fitness_Ledger_Nutrition_Current_State.json` is a rebuildable current-day cache and must never be treated as authoritative by itself.
+- `Fitness_Ledger_Nutrition_Weight_Tracker.xlsx` is a reporting projection. It is not the operational source of truth.
 - Fitness synchronization may use a separate canonical fitness/join file established during setup. Do not invent a filename when an existing Library reference is available.
 
 ## Read path
