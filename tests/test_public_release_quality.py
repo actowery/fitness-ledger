@@ -34,8 +34,8 @@ class PublicReleaseQualityTests(unittest.TestCase):
         fitness = (ROOT / "skills" / "fitness-sync" / "SKILL.md").read_text(encoding="utf-8")
         for skill in (nutrition, fitness):
             self.assertIn("ChatGPT Library", skill)
-            self.assertIn("local process", skill)
-            self.assertIn("offline developer/test reference", skill)
+            self.assertRegex(skill, r"(?s)(never require|must not).*local process")
+            self.assertRegex(skill, r"offline developer/test reference(s)?")
         self.assertNotIn("python3 scripts/nutrition_tracker.py", nutrition)
         self.assertNotIn("python3 scripts/fitness_sync.py", fitness)
 
