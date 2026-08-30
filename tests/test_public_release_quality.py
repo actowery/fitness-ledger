@@ -36,6 +36,8 @@ class PublicReleaseQualityTests(unittest.TestCase):
         self.assertIn("offline developer/test reference", nutrition)
         self.assertIn("ChatGPT Library", fitness)
         self.assertIn("must not depend on launching a local process", fitness)
+        self.assertIn("when those sources are connected", fitness)
+        self.assertIn("user-provided snapshots", fitness)
         self.assertIn("offline developer/test reference", fitness)
         self.assertNotIn("python3 scripts/nutrition_tracker.py", nutrition)
         self.assertNotIn("python3 scripts/fitness_sync.py", fitness)
