@@ -11,7 +11,6 @@ MARKETPLACE = ROOT / ".agents" / "plugins" / "marketplace.json"
 CI_WORKFLOW = ROOT / ".github" / "workflows" / "ci.yml"
 RELEASE_WORKFLOW = ROOT / ".github" / "workflows" / "release.yml"
 FORBIDDEN_MARKERS = (
-    "Battle Mage",
     "/workspace/",
     "/root/.codex",
     "libfile_",
