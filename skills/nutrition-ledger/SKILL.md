@@ -15,6 +15,7 @@ Use this skill when the user wants to log, correct, inspect, or summarize their 
 - For a mutation, preserve the ledger's Library identity and replace that same Library file only after validation and state reconciliation succeed.
 - Treat `Fitness_Ledger_Nutrition_Ledger.json` as canonical history and `Fitness_Ledger_Nutrition_Current_State.json` as rebuildable cache. The workbook is a reporting projection, not the operational source of truth.
 - If a required Library file cannot be resolved, ask the user to select or upload it. Do not silently create an unrelated local ledger.
+- If the user already has an established ledger under a different filename, prefer the selected or resolved existing file and preserve its identity; ask before creating or renaming anything. Generic filenames are defaults for new setups, not a reason to duplicate existing history.
 
 ## Core rules
 
