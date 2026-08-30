@@ -1,11 +1,21 @@
 ---
 name: nutrition-ledger
-description: Log food, hydration, and body weight into a local, auditable nutrition ledger; use for corrections, daily panels, and provenance-aware nutrient totals.
+description: Log food, hydration, and body weight into an auditable ChatGPT Library nutrition ledger; use for corrections, daily panels, and provenance-aware nutrient totals.
 ---
 
 # Nutrition Ledger
 
-Use this skill when the user wants to log, correct, inspect, or summarize their nutrition data. Keep the conversation natural, but store entries in a local JSON ledger supplied or created by the user. Do not assume a cloud account, a specific filename, or a private data store.
+Use this skill when the user wants to log, correct, inspect, or summarize their nutrition data. Keep the conversation natural, but store entries in the user's persistent ChatGPT Library files. The canonical ledger is a Library file; never require a local filesystem path, a local process, or manual spreadsheet maintenance.
+
+## Library-native persistence
+
+- Search Library by the canonical filenames or the user's selected Library reference before reading or mutating data.
+- Use the existing Library identity and current version when reading. Never create a duplicate copy when the canonical file already exists.
+- Read the canonical ledger before every report or mutation; do not rely on search snippets or a cached state file alone.
+- For a mutation, preserve the ledger's Library identity and replace that same Library file only after validation and state reconciliation succeed.
+- Treat `Fitness_Ledger_Nutrition_Ledger.json` as canonical history and `Fitness_Ledger_Nutrition_Current_State.json` as rebuildable cache. The workbook is a reporting projection, not the operational source of truth.
+- If a required Library file cannot be resolved, ask the user to select or upload it. Do not silently create an unrelated local ledger.
+- If the user already has an established ledger under a different filename, prefer the selected or resolved existing file and preserve its identity; ask before creating or renaming anything. Generic filenames are defaults for new setups, not a reason to duplicate existing history.
 
 ## Core rules
 
@@ -23,23 +33,15 @@ For a new user, initialize a ledger before logging data. Require a confirmed IAN
 
 Initialization also configures the daily combined synchronization schedule. Default it to `23:55` in the user's configured local timezone (near midnight), and ask for a different `HH:MM` time if desired. The schedule must be stored in the ledger; never interpret it in UTC or the runtime host timezone. The scheduled run checks nutrition, Caliber workouts, Apple Health workouts, and Apple Health activity every day, including rest days. A successful run records its completion; a failed or incomplete source check must be reported and must not publish derived fitness facts.
 
-After `init` succeeds, the host must create or update the scheduled task from the returned `sync.automation` object. Use its title, prompt, `default_timezone`, `sync_time_local`, schedule, and exact timing mode. Do not tell the user setup is complete until task creation or update succeeds; if scheduling is unavailable, report that initialization completed but automation setup remains pending.
-
-```bash
-python3 scripts/nutrition_tracker.py --ledger <ledger.json> --state <state.json> init \
-  --timezone Europe/London --daily-calories 2000 --daily-protein-g 150 \
-  --source apple-health --source caliber --sync-time 23:55
-```
+After initialization succeeds, store the requested sync configuration in the Library ledger. Do not claim that an external scheduled task exists unless the host explicitly provides and confirms that capability. A user-controlled daily automation may be offered, but its absence must not block ordinary mobile logging and reporting.
 
 Do not overwrite a ledger during onboarding. `--force` is reserved for an explicit replacement request.
 
 ## Daily reports
 
-Run the bundled script for deterministic operations:
+The bundled script is an offline developer/test reference. The ChatGPT runtime must use Library reads and replacements for persistence; mobile users must not be asked to run a command or depend on a local script.
 
-```bash
-python3 scripts/nutrition_tracker.py --ledger <ledger.json> --state <state.json> panel --date YYYY-MM-DD
-```
+Use the canonical renderer contract encoded in the ledger and skill. When the offline reference implementation is available in a development environment, it may be used for validation.
 
 `panel` and `foods` have one stable report contract: header, active entry count, fixed meal order, consistent food lines, hydration, and explicit unknowns. Use plain protein totals; do not expose internal protein-credit fields.
 
@@ -59,3 +61,5 @@ For micronutrient panels, append a clearly labeled nutrient section after the ca
 This is a data-quality and tracking workflow, not medical diagnosis or treatment. Do not infer nutrient deficiencies from one day or incomplete coverage. Keep the user in control of every mutation and do not transmit ledger contents to external services unless they explicitly ask for it.
 
 Read [the schema reference](references/schema.md) before modifying schema, provenance, cache, or workbook behavior.
+
+Read [the Library persistence contract](references/library-contract.md) before implementing or changing Library-backed read, mutation, cache, or conflict behavior.

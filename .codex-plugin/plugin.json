@@ -1,7 +1,7 @@
 {
   "name": "fitness-ledger",
-  "version": "0.1.0",
-  "description": "Local-first, provenance-aware nutrition and fitness tracking skills.",
+  "version": "0.2.0",
+  "description": "Library-native, provenance-aware nutrition and fitness tracking skills.",
   "author": {
     "name": "Fitness Ledger Contributors"
   },
@@ -9,10 +9,10 @@
   "interface": {
     "displayName": "Fitness Ledger",
     "shortDescription": "Track nutrition and reconcile fitness data.",
-    "longDescription": "Fitness Ledger provides local-first skills for nutrition logging, deterministic daily reports, and fitness-source reconciliation.",
+    "longDescription": "Fitness Ledger provides Library-native skills for nutrition logging, deterministic daily reports, and fitness-source reconciliation across supported ChatGPT surfaces.",
     "developerName": "Fitness Ledger Contributors",
     "category": "Health & Fitness",
     "capabilities": [],
-    "defaultPrompt": "Help me log food, view a daily nutrition report, or reconcile fitness data with Fitness Ledger."
+    "defaultPrompt": "Help me log food, view a daily nutrition report, or reconcile fitness data with Fitness Ledger Library files."
   }
 }

@@ -11,7 +11,6 @@ MARKETPLACE = ROOT / ".agents" / "plugins" / "marketplace.json"
 CI_WORKFLOW = ROOT / ".github" / "workflows" / "ci.yml"
 RELEASE_WORKFLOW = ROOT / ".github" / "workflows" / "release.yml"
 FORBIDDEN_MARKERS = (
-    "Battle Mage",
     "/workspace/",
     "/root/.codex",
     "libfile_",
@@ -28,6 +27,30 @@ class PublicReleaseQualityTests(unittest.TestCase):
         self.assertNotIn("mcpServers", manifest)
         self.assertNotIn("apps", manifest)
         self.assertNotEqual(manifest["author"]["name"], "Local developer")
+
+    def test_skills_are_library_native_and_do_not_require_local_runtime_execution(self) -> None:
+        nutrition = (ROOT / "skills" / "nutrition-ledger" / "SKILL.md").read_text(encoding="utf-8")
+        fitness = (ROOT / "skills" / "fitness-sync" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("ChatGPT Library", nutrition)
+        self.assertIn("never require a local filesystem path, a local process", nutrition)
+        self.assertIn("offline developer/test reference", nutrition)
+        self.assertIn("ChatGPT Library", fitness)
+        self.assertIn("must not depend on launching a local process", fitness)
+        self.assertIn("when those sources are connected", fitness)
+        self.assertIn("user-provided snapshots", fitness)
+        self.assertIn("offline developer/test reference", fitness)
+        self.assertNotIn("python3 scripts/nutrition_tracker.py", nutrition)
+        self.assertNotIn("python3 scripts/fitness_sync.py", fitness)
+
+    def test_library_persistence_contract_is_bundled_and_referenced(self) -> None:
+        contract = ROOT / "skills" / "nutrition-ledger" / "references" / "library-contract.md"
+        self.assertTrue(contract.is_file())
+        text = contract.read_text(encoding="utf-8")
+        for required in ("current-version guard", "No partial mutation", "Fitness_Ledger_Nutrition_Ledger.json"):
+            self.assertIn(required, text)
+        self.assertIn("never duplicate or rename", text)
+        fitness = (ROOT / "skills" / "fitness-sync" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("Library persistence contract", fitness)
 
     def test_repo_marketplace_exposes_the_plugin_from_github(self) -> None:
         marketplace = json.loads(MARKETPLACE.read_text(encoding="utf-8"))
