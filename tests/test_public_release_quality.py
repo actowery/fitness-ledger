@@ -65,6 +65,7 @@ class PublicReleaseQualityTests(unittest.TestCase):
         self.assertIsInstance(prompts, list)
         self.assertGreaterEqual(len(prompts), 1)
         self.assertLessEqual(len(prompts), 3)
+        self.assertTrue(all(isinstance(prompt, str) for prompt in prompts))
         self.assertEqual(len(prompts), len(set(prompts)))
         for prompt in prompts:
             self.assertLessEqual(len(prompt), 128)
