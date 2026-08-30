@@ -8,6 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).parents[1]
 MANIFEST = ROOT / ".codex-plugin" / "plugin.json"
 MARKETPLACE = ROOT / ".agents" / "plugins" / "marketplace.json"
+CI_WORKFLOW = ROOT / ".github" / "workflows" / "ci.yml"
 FORBIDDEN_MARKERS = (
     "Battle Mage",
     "/workspace/",
@@ -37,6 +38,13 @@ class PublicReleaseQualityTests(unittest.TestCase):
         self.assertEqual(entry["source"]["ref"], "main")
         self.assertEqual(entry["policy"]["installation"], "AVAILABLE")
         self.assertEqual(entry["policy"]["authentication"], "ON_INSTALL")
+
+    def test_ci_runs_on_pushes_and_pull_requests(self) -> None:
+        workflow = CI_WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("pull_request:", workflow)
+        self.assertIn("push:", workflow)
+        self.assertIn("python3 -m unittest discover -v -s tests", workflow)
+        self.assertIn("python3 -m json.tool .codex-plugin/plugin.json", workflow)
 
     def test_bundle_has_no_personal_paths_or_identifiers(self) -> None:
         ignored = {".git", "__pycache__"}
