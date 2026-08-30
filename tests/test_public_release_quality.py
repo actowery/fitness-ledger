@@ -29,6 +29,25 @@ class PublicReleaseQualityTests(unittest.TestCase):
         self.assertNotIn("apps", manifest)
         self.assertNotEqual(manifest["author"]["name"], "Local developer")
 
+    def test_skills_are_library_native_and_do_not_require_local_runtime_execution(self) -> None:
+        nutrition = (ROOT / "skills" / "nutrition-ledger" / "SKILL.md").read_text(encoding="utf-8")
+        fitness = (ROOT / "skills" / "fitness-sync" / "SKILL.md").read_text(encoding="utf-8")
+        for skill in (nutrition, fitness):
+            self.assertIn("ChatGPT Library", skill)
+            self.assertIn("local process", skill)
+            self.assertIn("offline developer/test reference", skill)
+        self.assertNotIn("python3 scripts/nutrition_tracker.py", nutrition)
+        self.assertNotIn("python3 scripts/fitness_sync.py", fitness)
+
+    def test_library_persistence_contract_is_bundled_and_referenced(self) -> None:
+        contract = ROOT / "skills" / "nutrition-ledger" / "references" / "library-contract.md"
+        self.assertTrue(contract.is_file())
+        text = contract.read_text(encoding="utf-8")
+        for required in ("current-version guard", "No partial mutation", "Battle_Mage_Nutrition_Ledger.json"):
+            self.assertIn(required, text)
+        fitness = (ROOT / "skills" / "fitness-sync" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("Library persistence contract", fitness)
+
     def test_repo_marketplace_exposes_the_plugin_from_github(self) -> None:
         marketplace = json.loads(MARKETPLACE.read_text(encoding="utf-8"))
         self.assertEqual(marketplace["name"], "fitness-ledger-marketplace")
