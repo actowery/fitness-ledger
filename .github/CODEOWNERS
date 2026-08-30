@@ -1,0 +1,16 @@
+# The repository maintainer owns all paths by default. GitHub branch protection
+# must be configured to require Code Owner review for this file to be enforced.
+* @actowery
+
+# Changes that can alter installation, execution, release, or project policy
+# require explicit maintainer review.
+/.github/workflows/ @actowery
+/.github/CODEOWNERS @actowery
+/.github/dependabot.yml @actowery
+/.codex-plugin/ @actowery
+/.agents/plugins/ @actowery
+/skills/ @actowery
+/tests/ @actowery
+/SECURITY.md @actowery
+/PRIVACY.md @actowery
+/RELEASE_CHECKLIST.md @actowery
