@@ -27,7 +27,7 @@ Use this skill to normalize and reconcile workout and activity snapshots that th
 
 ## Deterministic helpers
 
-The bundled Python helpers validate and reconcile fixtures without network access and are retained as offline developer/test references. The ChatGPT runtime must use connected Caliber and Apple Health sources plus Library reads/replacements; it must not depend on launching a local process.
+The bundled Python helpers validate and reconcile fixtures without network access and are retained as offline developer/test references. The ChatGPT runtime should use Caliber and Apple Health when those sources are connected, or reconcile user-provided snapshots when they are not; in either case, persistence uses Library reads/replacements and must not depend on launching a local process.
 
 ## Scheduled combined synchronization
 
