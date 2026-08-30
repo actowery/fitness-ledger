@@ -1,11 +1,19 @@
 ---
 name: fitness-sync
-description: Reconcile workout and activity-source snapshots into deterministic, provenance-preserving fitness facts; use for validation, rest-day checks, and source conflicts.
+description: Reconcile workout and activity-source snapshots into deterministic, provenance-preserving fitness facts in ChatGPT Library files; use for validation, rest-day checks, and source conflicts.
 ---
 
 # Fitness Sync
 
-Use this skill to normalize and reconcile workout and activity snapshots that the user provides or has already connected. It is source-agnostic: connectors belong outside this plugin.
+Use this skill to normalize and reconcile workout and activity snapshots that the user provides or has already connected. Persist raw observations, normalized fitness facts, and diagnostics in the user's ChatGPT Library files. It is source-agnostic: connectors remain outside this plugin.
+
+## Library-native persistence
+
+- Resolve the selected or canonical Library fitness files before reading or mutating them.
+- Read the complete relevant source snapshots and current canonical fitness data before reconciliation.
+- Replace the same canonical Library file identity after validation; never create a second “latest” file for an ordinary sync.
+- Preserve raw source observations, source completeness, coverage windows, stable IDs, conflicts, and audit history in the Library record.
+- If the canonical fitness file is absent, ask whether to initialize one in Library. Do not write to local paths or assume a private database.
 
 ## Core rules
 
@@ -19,7 +27,7 @@ Use this skill to normalize and reconcile workout and activity snapshots that th
 
 ## Deterministic helpers
 
-`scripts/fitness_sync.py` validates and reconciles source snapshots without network access. `scripts/combined_sync.py` demonstrates dependency-injected orchestration; it always runs the configured source checks, including on rest days.
+The bundled Python helpers validate and reconcile fixtures without network access and are retained as offline developer/test references. The ChatGPT runtime must use connected Caliber and Apple Health sources plus Library reads/replacements; it must not depend on launching a local process.
 
 ## Scheduled combined synchronization
 
@@ -30,3 +38,5 @@ Use the helpers with fixtures first. Add live connectors only outside this skill
 ## Safety boundary
 
 Do not infer health conditions or prescribe medical treatment from workout/activity data. Keep source provenance and uncertainty visible whenever data is incomplete or conflicting.
+
+Use the nutrition skill's [Library persistence contract](../nutrition-ledger/references/library-contract.md) for version-safe canonical-file reads and replacements. Fitness synchronization follows the same no-partial-write rule: if a source check, validation, reconciliation, or Library replacement fails, publish no derived fitness facts.
