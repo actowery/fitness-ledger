@@ -208,7 +208,7 @@ DEFAULT_DAILY_SYNC_TIME_LOCAL = "23:55"
 
 
 def validate_sync_time(value):
-    value = str(value or "")
+    value = str(value or "").strip()
     if not re.fullmatch(r"(?:[01]\d|2[0-3]):[0-5]\d", value):
         raise ValueError("sync time must use zero-padded local HH:MM in 24-hour format")
     return value
@@ -561,16 +561,16 @@ def main():
         if ledger_path.exists() and not args.force:
             raise SystemExit(f"ledger already exists: {ledger_path}; use --force only to replace it")
         ledger = initialize_ledger(
-            args.timezone,
-            {
+            timezone=args.timezone,
+            targets={
                 "daily_calories": args.daily_calories,
                 "daily_protein_g": args.daily_protein_g,
                 "daily_carbohydrates_g": args.daily_carbohydrates_g,
                 "daily_fat_g": args.daily_fat_g,
                 "daily_fiber_g": args.daily_fiber_g,
             },
-            args.source,
-            args.sync_time,
+            sources=args.source,
+            sync_time=args.sync_time,
         )
         state = rebuild(ledger, args.state, current_local_date(ledger))
         atomic_write(args.ledger, ledger)
