@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.2 - 2026-08-30
+
+- Added the shareable `weekly-review` skill for seven-day nutrition, activity, fitness, and trend reviews.
+- Standardized weekly target comparisons to persisted or explicitly user-provided targets; removed hard-coded calorie assumptions.
+
 ## 0.2.1 - 2026-08-30
 
 - Prepared the skills-only package for public Plugins Directory review.
