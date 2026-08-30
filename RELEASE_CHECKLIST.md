@@ -20,3 +20,4 @@
 - [ ] Update `CHANGELOG.md`.
 - [ ] Review `git status --ignored` for accidental private data.
 - [ ] Test installation from a clean clone before publishing or submitting the plugin.
+- [ ] Merge the release PR, then create a matching `vX.Y.Z` tag. GitHub Actions creates the release and source archives after validation passes.
