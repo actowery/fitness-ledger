@@ -11,6 +11,18 @@ No account, hosted service, telemetry, or bundled health-data connection is requ
 
 Each ledger must declare its own IANA timezone (for example, `Europe/London`). Date assignment uses that saved setting, never the host machine's clock or a regional default.
 
+## Install in ChatGPT or Codex
+
+In Codex CLI or the ChatGPT desktop app's Codex environment, add this GitHub repository as a marketplace source:
+
+```bash
+codex plugin marketplace add actowery/fitness-ledger --ref main
+```
+
+Restart or refresh the app, open the Plugins Directory, select **Fitness Ledger**, and install it. Start a new chat and say, “Set up my Fitness Ledger.” The skill will gather the timezone and any goals or source adapters the user chooses; ordinary users do not need to run the Python script.
+
+The GitHub marketplace path is `.agents/plugins/marketplace.json`. A workspace administrator can import that marketplace for team distribution. A public universal-directory listing is a separate OpenAI submission step.
+
 ## Install and test locally
 
 Install the plugin from a local marketplace or open the folder in Codex. Then run:

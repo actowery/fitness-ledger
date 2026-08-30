@@ -7,6 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).parents[1]
 MANIFEST = ROOT / ".codex-plugin" / "plugin.json"
+MARKETPLACE = ROOT / ".agents" / "plugins" / "marketplace.json"
 FORBIDDEN_MARKERS = (
     "Battle Mage",
     "/workspace/",
@@ -25,6 +26,17 @@ class PublicReleaseQualityTests(unittest.TestCase):
         self.assertNotIn("mcpServers", manifest)
         self.assertNotIn("apps", manifest)
         self.assertNotEqual(manifest["author"]["name"], "Local developer")
+
+    def test_repo_marketplace_exposes_the_plugin_from_github(self) -> None:
+        marketplace = json.loads(MARKETPLACE.read_text(encoding="utf-8"))
+        self.assertEqual(marketplace["name"], "fitness-ledger-marketplace")
+        entry = marketplace["plugins"][0]
+        self.assertEqual(entry["name"], "fitness-ledger")
+        self.assertEqual(entry["source"]["source"], "url")
+        self.assertEqual(entry["source"]["url"], "https://github.com/actowery/fitness-ledger.git")
+        self.assertEqual(entry["source"]["ref"], "main")
+        self.assertEqual(entry["policy"]["installation"], "AVAILABLE")
+        self.assertEqual(entry["policy"]["authentication"], "ON_INSTALL")
 
     def test_bundle_has_no_personal_paths_or_identifiers(self) -> None:
         ignored = {".git", "__pycache__"}
