@@ -17,6 +17,18 @@ Use this skill when the user wants to log, correct, inspect, or summarize their 
 - Use package labels before generic databases for branded food. Scale known nutrients for weighed portions.
 - Before reporting, reconcile from the ledger and validate it. Never report from a stale cache alone.
 
+## First-run setup
+
+For a new user, initialize a ledger before logging data. Require a confirmed IANA timezone; collect only the goals the user chooses to set. Optional Apple Health and Caliber selections record local adapter intent, not credentials or a claimed live connection.
+
+```bash
+python3 scripts/nutrition_tracker.py --ledger <ledger.json> --state <state.json> init \
+  --timezone Europe/London --daily-calories 2000 --daily-protein-g 150 \
+  --source apple-health --source caliber
+```
+
+Do not overwrite a ledger during onboarding. `--force` is reserved for an explicit replacement request.
+
 ## Daily reports
 
 Run the bundled script for deterministic operations:

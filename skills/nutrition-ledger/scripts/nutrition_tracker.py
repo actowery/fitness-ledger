@@ -204,6 +204,29 @@ def now_iso(ledger):
     return now_in_timezone(ledger).isoformat(timespec="seconds")
 
 
+def initialize_ledger(timezone, targets=None, sources=None):
+    """Create a minimal, explicit local ledger without credentials or live connections."""
+    template = {"timezone": timezone}
+    timezone_name_for(template)
+    targets = {key: value for key, value in (targets or {}).items() if value is not None}
+    adapters = {
+        source: {"status": "configured", "configured_at": now_iso(template)}
+        for source in (sources or [])
+    }
+    return {
+        "schema_version": "1.0.0",
+        "tracker_id": "nutrition-ledger",
+        "timezone": timezone,
+        "targets": targets,
+        "source_adapters": adapters,
+        "sync": {"pending_excel_sync": False},
+        "entries": [],
+        "weights": [],
+        "food_master": [],
+        "audit_log": [{"event": "ledger_initialized", "at": now_iso(template)}],
+    }
+
+
 def nutrient_fields(ledger):
     return tuple(ledger.get("nutrient_units", {}).keys()) or DEFAULT_NUTRIENTS
 
@@ -470,6 +493,15 @@ def main():
     p.add_argument("--ledger", required=True)
     p.add_argument("--state", required=True)
     sub = p.add_subparsers(dest="command", required=True)
+    init = sub.add_parser("init")
+    init.add_argument("--timezone", required=True)
+    init.add_argument("--daily-calories", type=float)
+    init.add_argument("--daily-protein-g", type=float)
+    init.add_argument("--daily-carbohydrates-g", type=float)
+    init.add_argument("--daily-fat-g", type=float)
+    init.add_argument("--daily-fiber-g", type=float)
+    init.add_argument("--source", action="append", choices=("apple-health", "caliber"), default=[])
+    init.add_argument("--force", action="store_true")
     for name in ("today", "validate"):
         sub.add_parser(name)
     day = sub.add_parser("day"); day.add_argument("--date", required=True)
@@ -484,6 +516,24 @@ def main():
     upsert_master = sub.add_parser("food-master-upsert"); upsert_master.add_argument("--record", required=True)
     add_master = sub.add_parser("add-from-master"); add_master.add_argument("--date"); add_master.add_argument("--date-source", choices=("inferred", "user_explicit"), default="inferred"); add_master.add_argument("--food-master-id", required=True); add_master.add_argument("--meal", required=True); add_master.add_argument("--amount", required=True); add_master.add_argument("--factor", type=float, default=1.0)
     args = p.parse_args()
+    if args.command == "init":
+        ledger_path = Path(args.ledger)
+        if ledger_path.exists() and not args.force:
+            raise SystemExit(f"ledger already exists: {ledger_path}; use --force only to replace it")
+        ledger = initialize_ledger(
+            args.timezone,
+            {
+                "daily_calories": args.daily_calories,
+                "daily_protein_g": args.daily_protein_g,
+                "daily_carbohydrates_g": args.daily_carbohydrates_g,
+                "daily_fat_g": args.daily_fat_g,
+                "daily_fiber_g": args.daily_fiber_g,
+            },
+            args.source,
+        )
+        state = rebuild(ledger, args.state, current_local_date(ledger))
+        atomic_write(args.ledger, ledger)
+        print(json.dumps({"ok": True, "initialized": True, "timezone": ledger["timezone"], "targets": ledger["targets"], "source_adapters": ledger["source_adapters"], "state": state}, indent=2)); return
     ledger = load(args.ledger)
 
     if args.command == "today":

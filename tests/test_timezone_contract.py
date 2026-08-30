@@ -18,6 +18,44 @@ SPEC.loader.exec_module(tracker)
 
 
 class TimezoneContractTests(unittest.TestCase):
+    def test_init_creates_configured_ledger_and_state(self):
+        with tempfile.TemporaryDirectory() as directory:
+            ledger_path = Path(directory) / "ledger.json"
+            state_path = Path(directory) / "state.json"
+
+            result = subprocess.run(
+                [
+                    sys.executable, str(SCRIPT), "--ledger", str(ledger_path), "--state", str(state_path),
+                    "init", "--timezone", "Asia/Tokyo", "--daily-calories", "2100",
+                    "--daily-protein-g", "140", "--source", "apple-health", "--source", "caliber",
+                ],
+                capture_output=True, text=True,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+            self.assertEqual(ledger["timezone"], "Asia/Tokyo")
+            self.assertEqual(ledger["targets"], {"daily_calories": 2100.0, "daily_protein_g": 140.0})
+            self.assertEqual(ledger["source_adapters"]["apple-health"]["status"], "configured")
+            self.assertEqual(ledger["source_adapters"]["caliber"]["status"], "configured")
+            self.assertTrue(state_path.is_file())
+
+    def test_init_refuses_to_overwrite_an_existing_ledger_without_force(self):
+        with tempfile.TemporaryDirectory() as directory:
+            ledger_path = Path(directory) / "ledger.json"
+            state_path = Path(directory) / "state.json"
+            ledger_path.write_text('{"timezone": "Europe/London"}\n', encoding="utf-8")
+            before = ledger_path.read_bytes()
+
+            result = subprocess.run(
+                [sys.executable, str(SCRIPT), "--ledger", str(ledger_path), "--state", str(state_path), "init", "--timezone", "Asia/Tokyo"],
+                capture_output=True, text=True,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("already exists", result.stderr)
+            self.assertEqual(ledger_path.read_bytes(), before)
+
     def test_timezone_is_required_and_never_defaults_to_a_region(self):
         with self.assertRaisesRegex(ValueError, "timezone is required"):
             tracker.timezone_for({})
