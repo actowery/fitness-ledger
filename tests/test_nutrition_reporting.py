@@ -63,7 +63,7 @@ Active entries only. Unknown means untracked, not zero.""")
 
         self.assertIn("Calories: 439 / 1,900 kcal (1,461 remaining)", report)
         self.assertIn("Protein: 12.9 / 160.0 g (147.1 remaining)", report)
-        self.assertNotIn("58%", report)
+        self.assertNotIn("%", report)
         self.assertNotIn("Daily Value", report)
 
     def test_foods_view_reuses_exact_meal_and_food_grammar(self):
