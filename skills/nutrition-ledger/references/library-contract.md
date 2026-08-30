@@ -8,6 +8,7 @@ This plugin uses ChatGPT Library as its persistence boundary. The conversation i
 - `Fitness_Ledger_Nutrition_Current_State.json` is a rebuildable current-day cache and must never be treated as authoritative by itself.
 - `Fitness_Ledger_Nutrition_Weight_Tracker.xlsx` is a reporting projection. It is not the operational source of truth.
 - Fitness synchronization may use a separate canonical fitness/join file established during setup. Do not invent a filename when an existing Library reference is available.
+- A user-selected or previously established ledger with another filename remains valid. Generic filenames are defaults for new setups only; never duplicate or rename an existing ledger automatically.
 
 ## Read path
 
