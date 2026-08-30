@@ -204,27 +204,66 @@ def now_iso(ledger):
     return now_in_timezone(ledger).isoformat(timespec="seconds")
 
 
-def initialize_ledger(timezone, targets=None, sources=None):
+DEFAULT_DAILY_SYNC_TIME_LOCAL = "23:55"
+
+
+def validate_sync_time(value):
+    value = str(value or "").strip()
+    if not re.fullmatch(r"(?:[01]\d|2[0-3]):[0-5]\d", value):
+        raise ValueError("sync time must use zero-padded local HH:MM in 24-hour format")
+    return value
+
+
+def scheduled_sync_task_config(ledger):
+    """Return the host-automation contract for the daily combined sync."""
+    timezone = timezone_name_for(ledger)
+    sync = ledger.get("sync", {})
+    sync_time = validate_sync_time(sync.get("daily_sync_time_local", DEFAULT_DAILY_SYNC_TIME_LOCAL))
+    return {
+        "title": "Fitness Ledger Daily Sync",
+        "timing_mode": "exact_schedule",
+        "default_timezone": timezone,
+        "sync_time_local": sync_time,
+        "schedule": "BEGIN:VEVENT\nRRULE:FREQ=DAILY\nEND:VEVENT",
+        "prompt": (
+            "Run the combined Fitness Ledger synchronization for the current local day. "
+            "Pull nutrition, Caliber workouts, Apple Health workouts, and Apple Health activity. "
+            "Reconcile sources, keep raw observations, use Apple Health as canonical for steps, "
+            "and report a clear success or failure. Do not publish derived fitness facts from "
+            "incomplete source responses. Run this even when there are no workouts."
+        ),
+    }
+
+
+def initialize_ledger(timezone, targets=None, sources=None, sync_time=DEFAULT_DAILY_SYNC_TIME_LOCAL):
     """Create a minimal, explicit local ledger without credentials or live connections."""
     template = {"timezone": timezone}
     timezone_name_for(template)
+    sync_time = validate_sync_time(sync_time)
     targets = {key: value for key, value in (targets or {}).items() if value is not None}
     adapters = {
         source: {"status": "configured", "configured_at": now_iso(template)}
         for source in (sources or [])
     }
-    return {
+    ledger = {
         "schema_version": "1.0.0",
         "tracker_id": "nutrition-ledger",
         "timezone": timezone,
         "targets": targets,
         "source_adapters": adapters,
-        "sync": {"pending_excel_sync": False},
+        "sync": {
+            "pending_excel_sync": False,
+            "daily_sync_enabled": True,
+            "daily_sync_time_local": sync_time,
+            "last_combined_sync_at": None,
+        },
         "entries": [],
         "weights": [],
         "food_master": [],
         "audit_log": [{"event": "ledger_initialized", "at": now_iso(template)}],
     }
+    ledger["sync"]["automation"] = scheduled_sync_task_config(ledger)
+    return ledger
 
 
 def nutrient_fields(ledger):
@@ -495,6 +534,7 @@ def main():
     sub = p.add_subparsers(dest="command", required=True)
     init = sub.add_parser("init")
     init.add_argument("--timezone", required=True)
+    init.add_argument("--sync-time", default=DEFAULT_DAILY_SYNC_TIME_LOCAL)
     init.add_argument("--daily-calories", type=float)
     init.add_argument("--daily-protein-g", type=float)
     init.add_argument("--daily-carbohydrates-g", type=float)
@@ -521,19 +561,20 @@ def main():
         if ledger_path.exists() and not args.force:
             raise SystemExit(f"ledger already exists: {ledger_path}; use --force only to replace it")
         ledger = initialize_ledger(
-            args.timezone,
-            {
+            timezone=args.timezone,
+            targets={
                 "daily_calories": args.daily_calories,
                 "daily_protein_g": args.daily_protein_g,
                 "daily_carbohydrates_g": args.daily_carbohydrates_g,
                 "daily_fat_g": args.daily_fat_g,
                 "daily_fiber_g": args.daily_fiber_g,
             },
-            args.source,
+            sources=args.source,
+            sync_time=args.sync_time,
         )
         state = rebuild(ledger, args.state, current_local_date(ledger))
         atomic_write(args.ledger, ledger)
-        print(json.dumps({"ok": True, "initialized": True, "timezone": ledger["timezone"], "targets": ledger["targets"], "source_adapters": ledger["source_adapters"], "state": state}, indent=2)); return
+        print(json.dumps({"ok": True, "initialized": True, "timezone": ledger["timezone"], "targets": ledger["targets"], "source_adapters": ledger["source_adapters"], "sync": ledger["sync"], "state": state}, indent=2)); return
     ledger = load(args.ledger)
 
     if args.command == "today":

@@ -18,6 +18,72 @@ SPEC.loader.exec_module(tracker)
 
 
 class TimezoneContractTests(unittest.TestCase):
+    def test_init_emits_complete_combined_sync_automation_contract(self):
+        ledger = tracker.initialize_ledger(
+            "America/New_York", sync_time="23:55", sources=["apple-health", "caliber"]
+        )
+
+        automation = ledger["sync"]["automation"]
+        self.assertEqual(automation["title"], "Fitness Ledger Daily Sync")
+        self.assertEqual(automation["timing_mode"], "exact_schedule")
+        self.assertEqual(automation["default_timezone"], "America/New_York")
+        self.assertEqual(automation["sync_time_local"], "23:55")
+        self.assertIn("RRULE:FREQ=DAILY", automation["schedule"])
+        self.assertIn("Apple Health", automation["prompt"])
+        self.assertIn("Caliber", automation["prompt"])
+
+    def test_automation_contract_uses_persisted_timezone_and_time(self):
+        ledger = tracker.initialize_ledger("Asia/Tokyo", sync_time="00:10")
+
+        automation = tracker.scheduled_sync_task_config(ledger)
+        self.assertEqual(automation["default_timezone"], "Asia/Tokyo")
+        self.assertEqual(automation["sync_time_local"], "00:10")
+
+    def test_init_defaults_daily_combined_sync_to_near_midnight_local_time(self):
+        with tempfile.TemporaryDirectory() as directory:
+            ledger_path = Path(directory) / "ledger.json"
+            state_path = Path(directory) / "state.json"
+
+            result = subprocess.run(
+                [
+                    sys.executable, str(SCRIPT), "--ledger", str(ledger_path), "--state", str(state_path),
+                    "init", "--timezone", "America/New_York",
+                ],
+                capture_output=True, text=True,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+            self.assertEqual(ledger["sync"]["daily_sync_time_local"], "23:55")
+            self.assertTrue(ledger["sync"]["daily_sync_enabled"])
+            self.assertIsNone(ledger["sync"]["last_combined_sync_at"])
+
+    def test_init_persists_custom_local_sync_time(self):
+        with tempfile.TemporaryDirectory() as directory:
+            ledger_path = Path(directory) / "ledger.json"
+            state_path = Path(directory) / "state.json"
+
+            result = subprocess.run(
+                [
+                    sys.executable, str(SCRIPT), "--ledger", str(ledger_path), "--state", str(state_path),
+                    "init", "--timezone", "Asia/Tokyo", "--sync-time", "00:10",
+                ],
+                capture_output=True, text=True,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+            self.assertEqual(ledger["sync"]["daily_sync_time_local"], "00:10")
+
+    def test_sync_time_must_be_zero_padded_local_24_hour_time(self):
+        for value in (" midnight", "24:00", "12:60", "9:05"):
+            with self.subTest(value=value):
+                with self.assertRaisesRegex(ValueError, "HH:MM"):
+                    tracker.validate_sync_time(value)
+
+    def test_sync_time_normalizes_surrounding_whitespace(self):
+        self.assertEqual(tracker.validate_sync_time(" 23:55 "), "23:55")
+
     def test_init_creates_configured_ledger_and_state(self):
         with tempfile.TemporaryDirectory() as directory:
             ledger_path = Path(directory) / "ledger.json"
