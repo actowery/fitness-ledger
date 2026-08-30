@@ -18,6 +18,48 @@ SPEC.loader.exec_module(tracker)
 
 
 class TimezoneContractTests(unittest.TestCase):
+    def test_init_defaults_daily_combined_sync_to_near_midnight_local_time(self):
+        with tempfile.TemporaryDirectory() as directory:
+            ledger_path = Path(directory) / "ledger.json"
+            state_path = Path(directory) / "state.json"
+
+            result = subprocess.run(
+                [
+                    sys.executable, str(SCRIPT), "--ledger", str(ledger_path), "--state", str(state_path),
+                    "init", "--timezone", "America/New_York",
+                ],
+                capture_output=True, text=True,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+            self.assertEqual(ledger["sync"]["daily_sync_time_local"], "23:55")
+            self.assertTrue(ledger["sync"]["daily_sync_enabled"])
+            self.assertIsNone(ledger["sync"]["last_combined_sync_at"])
+
+    def test_init_persists_custom_local_sync_time(self):
+        with tempfile.TemporaryDirectory() as directory:
+            ledger_path = Path(directory) / "ledger.json"
+            state_path = Path(directory) / "state.json"
+
+            result = subprocess.run(
+                [
+                    sys.executable, str(SCRIPT), "--ledger", str(ledger_path), "--state", str(state_path),
+                    "init", "--timezone", "Asia/Tokyo", "--sync-time", "00:10",
+                ],
+                capture_output=True, text=True,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+            self.assertEqual(ledger["sync"]["daily_sync_time_local"], "00:10")
+
+    def test_sync_time_must_be_zero_padded_local_24_hour_time(self):
+        for value in (" midnight", "24:00", "12:60", "9:05"):
+            with self.subTest(value=value):
+                with self.assertRaisesRegex(ValueError, "HH:MM"):
+                    tracker.validate_sync_time(value)
+
     def test_init_creates_configured_ledger_and_state(self):
         with tempfile.TemporaryDirectory() as directory:
             ledger_path = Path(directory) / "ledger.json"
