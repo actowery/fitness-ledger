@@ -10,7 +10,7 @@ Use this skill when the user wants to log, correct, inspect, or summarize their 
 ## Core rules
 
 - Treat the JSON ledger as canonical; a daily state file is rebuildable cache.
-- Use the ledger timezone for date assignment. Default to `America/New_York` only when the ledger has no timezone.
+- Require a persisted IANA timezone (for example, `Europe/London`) before assigning dates. Offer a detected local timezone only as a setup suggestion; never infer it from the runtime clock or silently default to a region.
 - Preserve corrections and deletions in the audit log. Do not silently overwrite history.
 - Track nutrient provenance per field: A label/direct, B authoritative reference, C reconstructed estimate, D unknown.
 - Missing is `unknown`, not zero. Retain source-declared zeroes.

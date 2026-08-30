@@ -9,6 +9,8 @@ Fitness Ledger is a local-first skill bundle for conversational nutrition loggin
 
 No account, hosted service, telemetry, or bundled health-data connection is required. Users own their ledger files and choose any optional source adapters separately.
 
+Each ledger must declare its own IANA timezone (for example, `Europe/London`). Date assignment uses that saved setting, never the host machine's clock or a regional default.
+
 ## Install and test locally
 
 Install the plugin from a local marketplace or open the folder in Codex. Then run:

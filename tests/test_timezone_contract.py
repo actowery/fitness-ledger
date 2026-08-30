@@ -18,6 +18,23 @@ SPEC.loader.exec_module(tracker)
 
 
 class TimezoneContractTests(unittest.TestCase):
+    def test_timezone_is_required_and_never_defaults_to_a_region(self):
+        with self.assertRaisesRegex(ValueError, "timezone is required"):
+            tracker.timezone_for({})
+
+        with self.assertRaisesRegex(ValueError, "timezone is required"):
+            tracker.render_daily_report({"entries": [], "weights": []}, "2026-08-30")
+
+    def test_timezone_must_be_a_valid_iana_identifier(self):
+        with self.assertRaisesRegex(ValueError, "valid IANA timezone"):
+            tracker.timezone_for({"timezone": "Eastern Time"})
+
+    def test_any_configured_iana_timezone_drives_today(self):
+        ledger = {"timezone": "Pacific/Auckland"}
+        utc_now = dt.datetime(2026, 8, 30, 11, 30, tzinfo=dt.timezone.utc)
+
+        self.assertEqual(tracker.current_local_date(ledger, now=utc_now), "2026-08-30")
+
     def test_today_uses_ledger_timezone_not_utc_date(self):
         ledger = {"timezone": "America/New_York"}
         utc_now = dt.datetime(2026, 8, 30, 0, 30, tzinfo=dt.timezone.utc)

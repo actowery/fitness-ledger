@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "tracker_id": "example-nutrition-ledger",
-  "timezone": "America/New_York",
+  "timezone": "Europe/London",
   "targets": {},
   "sync": {
     "pending_excel_sync": false

@@ -7,7 +7,7 @@ import os
 import re
 import tempfile
 from pathlib import Path
-from zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 CORE_NUTRIENTS = ("calories", "protein_g", "protein_credit_g", "carbohydrates_g", "fat_g", "fiber_g")
 DEFAULT_NUTRIENTS = CORE_NUTRIENTS + (
@@ -21,8 +21,6 @@ DEFAULT_NUTRIENTS = CORE_NUTRIENTS + (
     "chromium_mcg", "molybdenum_mcg", "monounsaturated_fat_g",
     "polyunsaturated_fat_g", "water_g", "water_oz",
 )
-DEFAULT_TIMEZONE = "America/New_York"
-
 MEAL_ORDER = ("Breakfast", "Lunch", "Dinner", "Snacks", "Drinks", "Other")
 
 
@@ -91,7 +89,7 @@ def render_daily_report(ledger, date, view="panel"):
     if view not in ("panel", "foods"):
         raise ValueError("view must be panel or foods")
     totals, rows = totals_for(ledger, date)
-    timezone = ledger.get("timezone") or "America/New_York"
+    timezone = timezone_name_for(ledger)
     heading = "Nutrition Panel" if view == "panel" else "Foods Eaten"
     weight = weight_for(ledger, date)
     lines = [
@@ -163,8 +161,19 @@ def atomic_write(path, data):
             os.unlink(tmp)
 
 
+def timezone_name_for(ledger):
+    timezone = str(ledger.get("timezone") or "").strip()
+    if not timezone:
+        raise ValueError("timezone is required; configure an IANA timezone such as Europe/London")
+    try:
+        ZoneInfo(timezone)
+    except ZoneInfoNotFoundError as exc:
+        raise ValueError(f"timezone must be a valid IANA timezone, got {timezone!r}") from exc
+    return timezone
+
+
 def timezone_for(ledger):
-    return ZoneInfo(ledger.get("timezone") or DEFAULT_TIMEZONE)
+    return ZoneInfo(timezone_name_for(ledger))
 
 
 def now_in_timezone(ledger, now=None):
@@ -185,14 +194,14 @@ def resolve_entry_date(ledger, requested_date=None, date_source="inferred", now=
     if date_source == "inferred" and requested_date != today:
         raise ValueError(
             f"inferred date {requested_date} does not match today in "
-            f"{ledger.get('timezone') or DEFAULT_TIMEZONE} ({today}); "
+            f"{timezone_name_for(ledger)} ({today}); "
             "use date_source=user_explicit only when the user supplied the date"
         )
     return requested_date
 
 
-def now_iso(ledger=None):
-    return now_in_timezone(ledger or {"timezone": DEFAULT_TIMEZONE}).isoformat(timespec="seconds")
+def now_iso(ledger):
+    return now_in_timezone(ledger).isoformat(timespec="seconds")
 
 
 def nutrient_fields(ledger):
