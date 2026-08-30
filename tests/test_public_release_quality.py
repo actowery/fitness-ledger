@@ -1,6 +1,7 @@
 """Release gates for a distributable, skills-only Fitness Ledger plugin."""
 
 import json
+import re
 import unittest
 from pathlib import Path
 
@@ -27,6 +28,55 @@ class PublicReleaseQualityTests(unittest.TestCase):
         self.assertNotIn("mcpServers", manifest)
         self.assertNotIn("apps", manifest)
         self.assertNotEqual(manifest["author"]["name"], "Local developer")
+
+    def test_manifest_metadata_meets_public_directory_limits(self) -> None:
+        manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+        interface = manifest["interface"]
+        self.assertLessEqual(len(interface["displayName"]), 30)
+        self.assertLessEqual(len(interface["shortDescription"]), 30)
+        self.assertLessEqual(len(interface["longDescription"]), 4000)
+        self.assertLessEqual(len(interface["developerName"]), 80)
+        self.assertIn(
+            interface["category"],
+            {
+                "Productivity",
+                "Creativity",
+                "Developer Tools",
+                "Business & Operations",
+                "Data & Analytics",
+                "Communication",
+                "Education & Research",
+                "Security",
+                "Finance",
+                "Healthcare",
+                "Travel",
+                "Entertainment",
+                "Other",
+            },
+        )
+        for field in ("websiteURL", "privacyPolicyURL", "termsOfServiceURL"):
+            self.assertTrue(interface[field].startswith("https://"))
+            self.assertLessEqual(len(interface[field]), 1024)
+        for field in ("logo", "composerIcon"):
+            asset = interface[field]
+            self.assertTrue(asset.startswith("./assets/"))
+            self.assertTrue((ROOT / asset.removeprefix("./")).is_file())
+        prompts = interface["defaultPrompt"]
+        self.assertIsInstance(prompts, list)
+        self.assertGreaterEqual(len(prompts), 1)
+        self.assertLessEqual(len(prompts), 3)
+        self.assertTrue(all(isinstance(prompt, str) for prompt in prompts))
+        self.assertEqual(len(prompts), len(set(prompts)))
+        for prompt in prompts:
+            self.assertLessEqual(len(prompt), 128)
+            self.assertNotIn("\n", prompt)
+
+    def test_package_and_plugin_versions_match(self) -> None:
+        manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+        project = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+        match = re.search(r'^version = "([^"]+)"$', project, flags=re.MULTILINE)
+        self.assertIsNotNone(match)
+        self.assertEqual(match.group(1), manifest["version"])
 
     def test_skills_are_library_native_and_do_not_require_local_runtime_execution(self) -> None:
         nutrition = (ROOT / "skills" / "nutrition-ledger" / "SKILL.md").read_text(encoding="utf-8")
@@ -94,10 +144,13 @@ class PublicReleaseQualityTests(unittest.TestCase):
         for filename in (
             "README.md",
             "PRIVACY.md",
+            "TERMS.md",
+            "SUPPORT.md",
             "SECURITY.md",
             "LICENSE",
             "CONTRIBUTING.md",
             "PLUGIN_TEST_MATRIX.md",
+            "PUBLIC_SUBMISSION.md",
             "RELEASE_CHECKLIST.md",
             "examples/sample_ledger.json",
         ):
