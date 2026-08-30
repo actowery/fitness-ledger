@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fitness-ledger"
-version = "0.1.0"
-description = "Local-first conversational nutrition and fitness data skills"
+version = "0.2.1"
+description = "Library-native conversational nutrition and fitness data skills"
 requires-python = ">=3.10"
 
 [tool.setuptools]
