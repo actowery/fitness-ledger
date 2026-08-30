@@ -81,6 +81,9 @@ class TimezoneContractTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "HH:MM"):
                     tracker.validate_sync_time(value)
 
+    def test_sync_time_normalizes_surrounding_whitespace(self):
+        self.assertEqual(tracker.validate_sync_time(" 23:55 "), "23:55")
+
     def test_init_creates_configured_ledger_and_state(self):
         with tempfile.TemporaryDirectory() as directory:
             ledger_path = Path(directory) / "ledger.json"
