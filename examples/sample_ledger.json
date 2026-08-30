@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "tracker_id": "example-nutrition-ledger",
+  "timezone": "America/New_York",
+  "targets": {},
+  "sync": {
+    "pending_excel_sync": false
+  },
+  "entries": [],
+  "weights": [],
+  "food_master": [],
+  "audit_log": []
+}

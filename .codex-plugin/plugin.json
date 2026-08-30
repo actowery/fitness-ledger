@@ -1,0 +1,18 @@
+{
+  "name": "fitness-ledger",
+  "version": "0.1.0",
+  "description": "Local-first, provenance-aware nutrition and fitness tracking skills.",
+  "author": {
+    "name": "Fitness Ledger Contributors"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Fitness Ledger",
+    "shortDescription": "Track nutrition and reconcile fitness data.",
+    "longDescription": "Fitness Ledger provides local-first skills for nutrition logging, deterministic daily reports, and fitness-source reconciliation.",
+    "developerName": "Fitness Ledger Contributors",
+    "category": "Health & Fitness",
+    "capabilities": [],
+    "defaultPrompt": "Help me log food, view a daily nutrition report, or reconcile fitness data with Fitness Ledger."
+  }
+}
