@@ -31,10 +31,12 @@ class PublicReleaseQualityTests(unittest.TestCase):
     def test_skills_are_library_native_and_do_not_require_local_runtime_execution(self) -> None:
         nutrition = (ROOT / "skills" / "nutrition-ledger" / "SKILL.md").read_text(encoding="utf-8")
         fitness = (ROOT / "skills" / "fitness-sync" / "SKILL.md").read_text(encoding="utf-8")
-        for skill in (nutrition, fitness):
-            self.assertIn("ChatGPT Library", skill)
-            self.assertIn("local process", skill)
-            self.assertIn("offline developer/test reference", skill)
+        self.assertIn("ChatGPT Library", nutrition)
+        self.assertIn("never require a local filesystem path, a local process", nutrition)
+        self.assertIn("offline developer/test reference", nutrition)
+        self.assertIn("ChatGPT Library", fitness)
+        self.assertIn("must not depend on launching a local process", fitness)
+        self.assertIn("offline developer/test reference", fitness)
         self.assertNotIn("python3 scripts/nutrition_tracker.py", nutrition)
         self.assertNotIn("python3 scripts/fitness_sync.py", fitness)
 
