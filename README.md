@@ -1,13 +1,13 @@
 # Fitness Ledger
 
-Fitness Ledger is a local-first skill bundle for conversational nutrition logging, deterministic daily reporting, and fitness-source reconciliation. It is designed for people who want AI convenience without opaque, silently changing health records.
+Fitness Ledger is a Library-native skill bundle for conversational nutrition logging, deterministic daily reporting, and fitness-source reconciliation. It is designed for people who want AI convenience without opaque, silently changing health records.
 
 ## What it includes
 
 - `nutrition-ledger`: provenance-aware food, hydration, and weight logging with corrections, tombstones, validation, and consistent reports.
 - `fitness-sync`: pure validation and reconciliation helpers for workout/activity snapshots.
 
-No account, hosted service, telemetry, or bundled health-data connection is required. Users own their ledger files and choose any optional source adapters separately.
+No hosted service, telemetry, or bundled health-data connection is required. The user's ChatGPT Library stores the canonical ledger files, while Caliber and Apple Health remain optional connected source adapters.
 
 Each ledger must declare its own IANA timezone (for example, `Europe/London`). Date assignment uses that saved setting, never the host machine's clock or a regional default.
 
@@ -19,7 +19,7 @@ In Codex CLI or the ChatGPT desktop app's Codex environment, add this GitHub rep
 codex plugin marketplace add actowery/fitness-ledger --ref main
 ```
 
-Restart or refresh the app, open the Plugins Directory, select **Fitness Ledger**, and install it. Start a new chat and say, “Set up my Fitness Ledger.” The skill will gather the timezone and any goals or source adapters the user chooses; ordinary users do not need to run the Python script.
+Refresh the plugin directory, select **Fitness Ledger**, and install it. Start a new Work chat and say, “Set up my Fitness Ledger.” The skill will resolve or create the canonical Library files, gather the timezone and any goals or source adapters the user chooses, and operate through Library rather than requiring a computer or local script.
 
 The GitHub marketplace path is `.agents/plugins/marketplace.json`. A workspace administrator can import that marketplace for team distribution. A public universal-directory listing is a separate OpenAI submission step.
 
