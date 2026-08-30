@@ -23,7 +23,7 @@ Use this skill to normalize and reconcile workout and activity snapshots that th
 
 ## Scheduled combined synchronization
 
-The nutrition ledger's initialization contract owns the daily schedule in `sync.daily_sync_time_local`, defaulting to `23:55` local time. The scheduler must use the persisted IANA timezone and invoke `run_combined_sync` at that local wall-clock time. Every run pulls nutrition, Caliber workouts, Apple Health workouts, and Apple Health activity; it must emit a clear success or failure result even when no workouts exist. This is an orchestration contract for the host application: installing this skills-only plugin does not itself create an operating-system or ChatGPT automation.
+The nutrition ledger's initialization contract owns the daily schedule in `sync.daily_sync_time_local`, defaulting to `23:55` local time. The scheduler must use the persisted IANA timezone and invoke `run_combined_sync` at that local wall-clock time. Every run pulls nutrition, Caliber workouts, Apple Health workouts, and Apple Health activity; it must emit a clear success or failure result even when no workouts exist. A successful run records its completion; an incomplete source response blocks publication. This is an orchestration contract for the host application: installing this skills-only plugin does not itself create an operating-system or ChatGPT automation.
 
 Use the helpers with fixtures first. Add live connectors only outside this skills-only package, with separate authentication and privacy review.
 
