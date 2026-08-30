@@ -204,10 +204,21 @@ def now_iso(ledger):
     return now_in_timezone(ledger).isoformat(timespec="seconds")
 
 
-def initialize_ledger(timezone, targets=None, sources=None):
+DEFAULT_DAILY_SYNC_TIME_LOCAL = "23:55"
+
+
+def validate_sync_time(value):
+    value = str(value or "")
+    if not re.fullmatch(r"(?:[01]\d|2[0-3]):[0-5]\d", value):
+        raise ValueError("sync time must use zero-padded local HH:MM in 24-hour format")
+    return value
+
+
+def initialize_ledger(timezone, targets=None, sources=None, sync_time=DEFAULT_DAILY_SYNC_TIME_LOCAL):
     """Create a minimal, explicit local ledger without credentials or live connections."""
     template = {"timezone": timezone}
     timezone_name_for(template)
+    sync_time = validate_sync_time(sync_time)
     targets = {key: value for key, value in (targets or {}).items() if value is not None}
     adapters = {
         source: {"status": "configured", "configured_at": now_iso(template)}
@@ -219,7 +230,12 @@ def initialize_ledger(timezone, targets=None, sources=None):
         "timezone": timezone,
         "targets": targets,
         "source_adapters": adapters,
-        "sync": {"pending_excel_sync": False},
+        "sync": {
+            "pending_excel_sync": False,
+            "daily_sync_enabled": True,
+            "daily_sync_time_local": sync_time,
+            "last_combined_sync_at": None,
+        },
         "entries": [],
         "weights": [],
         "food_master": [],
@@ -495,6 +511,7 @@ def main():
     sub = p.add_subparsers(dest="command", required=True)
     init = sub.add_parser("init")
     init.add_argument("--timezone", required=True)
+    init.add_argument("--sync-time", default=DEFAULT_DAILY_SYNC_TIME_LOCAL)
     init.add_argument("--daily-calories", type=float)
     init.add_argument("--daily-protein-g", type=float)
     init.add_argument("--daily-carbohydrates-g", type=float)
@@ -530,6 +547,7 @@ def main():
                 "daily_fiber_g": args.daily_fiber_g,
             },
             args.source,
+            args.sync_time,
         )
         state = rebuild(ledger, args.state, current_local_date(ledger))
         atomic_write(args.ledger, ledger)
