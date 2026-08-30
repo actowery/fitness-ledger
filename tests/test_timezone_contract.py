@@ -18,6 +18,27 @@ SPEC.loader.exec_module(tracker)
 
 
 class TimezoneContractTests(unittest.TestCase):
+    def test_init_emits_complete_combined_sync_automation_contract(self):
+        ledger = tracker.initialize_ledger(
+            "America/New_York", sync_time="23:55", sources=["apple-health", "caliber"]
+        )
+
+        automation = ledger["sync"]["automation"]
+        self.assertEqual(automation["title"], "Fitness Ledger Daily Sync")
+        self.assertEqual(automation["timing_mode"], "exact_schedule")
+        self.assertEqual(automation["default_timezone"], "America/New_York")
+        self.assertEqual(automation["sync_time_local"], "23:55")
+        self.assertIn("RRULE:FREQ=DAILY", automation["schedule"])
+        self.assertIn("Apple Health", automation["prompt"])
+        self.assertIn("Caliber", automation["prompt"])
+
+    def test_automation_contract_uses_persisted_timezone_and_time(self):
+        ledger = tracker.initialize_ledger("Asia/Tokyo", sync_time="00:10")
+
+        automation = tracker.scheduled_sync_task_config(ledger)
+        self.assertEqual(automation["default_timezone"], "Asia/Tokyo")
+        self.assertEqual(automation["sync_time_local"], "00:10")
+
     def test_init_defaults_daily_combined_sync_to_near_midnight_local_time(self):
         with tempfile.TemporaryDirectory() as directory:
             ledger_path = Path(directory) / "ledger.json"
