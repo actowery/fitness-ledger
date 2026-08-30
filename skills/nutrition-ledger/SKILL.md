@@ -49,8 +49,8 @@ Natural-language report routing is mandatory:
 - “Today’s panel,” “today’s numbers,” or equivalent requests map to `panel`.
 - “Full nutrient panel” maps to `panel` followed by the labeled micronutrient section.
 - Never manually reconstruct a daily report from raw JSON, a cache, or ad-hoc calculations when the canonical renderer is available.
-- The Progress section reports calories and protein against the user’s personal targets, never FDA Daily Values. `%DV`/reference percentages belong only in the micronutrient section.
-- If a personal target is unavailable, render the target as unavailable; do not substitute a generic DV without labeling it.
+- The Progress section reports calories and protein against the user’s personal targets (when configured), never FDA Daily Values. `%DV`/reference percentages belong only in the micronutrient section.
+- If a personal target is unavailable, render the target as unavailable; do not substitute a generic DV.
 
 For micronutrient panels, append a clearly labeled nutrient section after the canonical daily panel. Show amount plus %DV/reference for each known nutrient and `unknown` for missing fields.
 
