@@ -23,6 +23,10 @@ Refresh the plugin directory, select **Fitness Ledger**, and install it. Start a
 
 The GitHub marketplace path is `.agents/plugins/marketplace.json`. A workspace administrator can import that marketplace for team distribution. A public universal-directory listing is a separate OpenAI submission step.
 
+## Public directory submission
+
+Fitness Ledger is prepared as a skills-only public plugin. `PUBLIC_SUBMISSION.md` contains the listing copy, starter prompts, reviewer test cases, release notes, and submission checklist. `PRIVACY.md`, `TERMS.md`, and `SUPPORT.md` provide the public policy and support URLs. Public availability begins only after OpenAI review and an explicit publish action in the plugin submission portal.
+
 ## Contributing workflow
 
 Create a topic branch, make a focused change with tests, and open a pull request into `main`. GitHub Actions runs the full test suite on every pull request and on pushes to `main`, across supported Python versions. Merge only after the checks are green and the change has been reviewed. Repository maintainers can additionally require the `CI` check in GitHub branch protection settings.
