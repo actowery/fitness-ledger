@@ -105,7 +105,7 @@ class PublicReleaseQualityTests(unittest.TestCase):
             "canonical Library nutrition ledger",
             "persisted IANA timezone",
             "Apple Health is canonical",
-            "unknown`, never as zero",
+            "`unknown`, never as zero",
             "weekly review is read-only",
         ):
             self.assertIn(required, text)
