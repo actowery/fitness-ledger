@@ -1,6 +1,6 @@
 ---
 name: weekly-review
-description: Review a completed nutrition and fitness week using the user's persisted targets, canonical ledger, and reconciled activity data.
+description: Review a completed nutrition and fitness week in ChatGPT Library using the user's persisted targets, canonical ledger, and reconciled activity data.
 ---
 
 # Weekly Review
