@@ -21,10 +21,12 @@ Use this skill when the user wants to log, correct, inspect, or summarize their 
 
 For a new user, initialize a ledger before logging data. Require a confirmed IANA timezone; collect only the goals the user chooses to set. Optional Apple Health and Caliber selections record local adapter intent, not credentials or a claimed live connection.
 
+Initialization also configures the daily combined synchronization schedule. Default it to `23:55` in the user's configured local timezone (near midnight), and ask for a different `HH:MM` time if desired. The schedule must be stored in the ledger; never interpret it in UTC or the runtime host timezone. The scheduled run checks nutrition, Caliber workouts, Apple Health workouts, and Apple Health activity every day, including rest days. A successful run records its completion; a failed or incomplete source check must be reported and must not publish derived fitness facts.
+
 ```bash
 python3 scripts/nutrition_tracker.py --ledger <ledger.json> --state <state.json> init \
   --timezone Europe/London --daily-calories 2000 --daily-protein-g 150 \
-  --source apple-health --source caliber
+  --source apple-health --source caliber --sync-time 23:55
 ```
 
 Do not overwrite a ledger during onboarding. `--force` is reserved for an explicit replacement request.
