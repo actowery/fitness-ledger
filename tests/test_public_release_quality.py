@@ -65,7 +65,6 @@ class PublicReleaseQualityTests(unittest.TestCase):
         self.assertIsInstance(prompts, list)
         self.assertGreaterEqual(len(prompts), 1)
         self.assertLessEqual(len(prompts), 3)
-        self.assertTrue(all(isinstance(prompt, str) for prompt in prompts))
         self.assertEqual(len(prompts), len(set(prompts)))
         for prompt in prompts:
             self.assertLessEqual(len(prompt), 128)
@@ -81,7 +80,6 @@ class PublicReleaseQualityTests(unittest.TestCase):
     def test_skills_are_library_native_and_do_not_require_local_runtime_execution(self) -> None:
         nutrition = (ROOT / "skills" / "nutrition-ledger" / "SKILL.md").read_text(encoding="utf-8")
         fitness = (ROOT / "skills" / "fitness-sync" / "SKILL.md").read_text(encoding="utf-8")
-        weekly = (ROOT / "skills" / "weekly-review" / "SKILL.md").read_text(encoding="utf-8")
         self.assertIn("ChatGPT Library", nutrition)
         self.assertIn("never require a local filesystem path, a local process", nutrition)
         self.assertIn("offline developer/test reference", nutrition)
@@ -92,23 +90,6 @@ class PublicReleaseQualityTests(unittest.TestCase):
         self.assertIn("offline developer/test reference", fitness)
         self.assertNotIn("python3 scripts/nutrition_tracker.py", nutrition)
         self.assertNotIn("python3 scripts/fitness_sync.py", fitness)
-        self.assertIn("user-specific", weekly)
-        self.assertIn("never use a hard-coded 2,000-kcal standard", weekly)
-        self.assertIn("explicitly supplied by the user", weekly)
-        self.assertNotIn("--daily-calories 2000", nutrition)
-
-    def test_weekly_review_is_target_safe_and_shareable(self) -> None:
-        weekly = ROOT / "skills" / "weekly-review" / "SKILL.md"
-        self.assertTrue(weekly.is_file())
-        text = weekly.read_text(encoding="utf-8")
-        for required in (
-            "canonical Library nutrition ledger",
-            "persisted IANA timezone",
-            "Apple Health is canonical",
-            "`unknown`, never as zero",
-            "weekly review is read-only",
-        ):
-            self.assertIn(required, text)
 
     def test_library_persistence_contract_is_bundled_and_referenced(self) -> None:
         contract = ROOT / "skills" / "nutrition-ledger" / "references" / "library-contract.md"

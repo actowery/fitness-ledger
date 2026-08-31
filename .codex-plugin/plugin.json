@@ -1,6 +1,6 @@
 {
   "name": "fitness-ledger",
-  "version": "0.2.2",
+  "version": "0.4.0",
   "description": "Library-native, provenance-aware nutrition and fitness tracking skills.",
   "author": {
     "name": "Fitness Ledger Contributors",
@@ -20,7 +20,6 @@
     "capabilities": [
       "Nutrition and hydration logging",
       "Deterministic daily reports",
-      "Weekly nutrition and fitness reviews",
       "Provenance-aware corrections",
       "Workout and activity reconciliation"
     ],

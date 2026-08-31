@@ -6,7 +6,6 @@ Fitness Ledger is a Library-native skill bundle for conversational nutrition log
 
 - `nutrition-ledger`: provenance-aware food, hydration, and weight logging with corrections, tombstones, validation, and consistent reports.
 - `fitness-sync`: pure validation and reconciliation helpers for workout/activity snapshots.
-- `weekly-review`: seven-day nutrition, activity, and fitness review using user-specific targets and reconciled sources.
 
 No hosted service, telemetry, or bundled health-data connection is required. The user's ChatGPT Library stores the canonical ledger files, while Caliber and Apple Health remain optional connected source adapters.
 

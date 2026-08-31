@@ -5,8 +5,6 @@ description: Log food, hydration, and body weight into an auditable ChatGPT Libr
 
 # Nutrition Ledger
 
-For seven-day recaps, trends, adherence, or nutrition/fitness cross-references, route to the companion `weekly-review` skill after resolving the canonical ledger.
-
 Use this skill when the user wants to log, correct, inspect, or summarize their nutrition data. Keep the conversation natural, but store entries in the user's persistent ChatGPT Library files. The canonical ledger is a Library file; never require a local filesystem path, a local process, or manual spreadsheet maintenance.
 
 ## Library-native persistence
@@ -23,12 +21,23 @@ Use this skill when the user wants to log, correct, inspect, or summarize their 
 
 - Treat the JSON ledger as canonical; a daily state file is rebuildable cache.
 - Require a persisted IANA timezone (for example, `Europe/London`) before assigning dates. Offer a detected local timezone only as a setup suggestion; never infer it from the runtime clock or silently default to a region.
-- Date guard: when a logging command omits `--date`, derive the date inside the tracker from the persisted IANA timezone. If a caller supplies `--date`, it must also pass `--date-source user_explicit`; an inferred or host-derived date is rejected before mutation, even if it happens to equal local today. Historical dates are therefore an explicit user action, not a runtime default.
 - Preserve corrections and deletions in the audit log. Do not silently overwrite history.
 - Track nutrient provenance per field: A label/direct, B authoritative reference, C reconstructed estimate, D unknown.
+- Track identity, portion, and composition confidence separately; never collapse them into an opaque score.
 - Missing is `unknown`, not zero. Retain source-declared zeroes.
+- Report item-, calorie-, and confidence-weighted nutrient coverage; gate adequacy interpretations when coverage is insufficient.
 - Use package labels before generic databases for branded food. Scale known nutrients for weighed portions.
 - Before reporting, reconcile from the ledger and validate it. Never report from a stale cache alone.
+
+## Product identity and versioning
+
+Food masters may carry GTIN/UPC, brand/manufacturer, product name, variant,
+package and serving attributes, source identifiers, verification timestamps,
+and a deterministic formulation fingerprint. A same-GTIN formulation change
+creates a new version linked by `supersedes_food_master_id`; it never rewrites
+historical entries. Name-only or duplicate matches remain ambiguous and must
+not receive unjustified Tier-A identity confidence. The offline reference
+helpers live in `scripts/product_identity.py`.
 
 ## First-run setup
 
@@ -56,7 +65,6 @@ Natural-language report routing is mandatory:
 - Never manually reconstruct a daily report from raw JSON, a cache, or ad-hoc calculations when the canonical renderer is available.
 - The Progress section reports calories and protein against the user’s personal targets (when configured), never FDA Daily Values. `%DV`/reference percentages belong only in the micronutrient section.
 - If a personal target is unavailable, render the target as unavailable; do not substitute a generic DV.
-- Never use a hard-coded calorie or protein target (including 2,000 kcal). Targets must come from the persisted ledger or an explicit user-provided value.
 
 For micronutrient panels, append a clearly labeled nutrient section after the canonical daily panel. Show amount plus %DV/reference for each known nutrient and `unknown` for missing fields.
 
@@ -67,3 +75,9 @@ This is a data-quality and tracking workflow, not medical diagnosis or treatment
 Read [the schema reference](references/schema.md) before modifying schema, provenance, cache, or workbook behavior.
 
 Read [the Library persistence contract](references/library-contract.md) before implementing or changing Library-backed read, mutation, cache, or conflict behavior.
+
+The offline reference modules in `scripts/` expose identity/versioning,
+confidence, coverage, source resolution, barcode, enrichment, invariants,
+debt, longitudinal, contribution, activity-join, and migration primitives.
+They are testable building blocks; ChatGPT runtime persistence still follows
+the Library contract above.
