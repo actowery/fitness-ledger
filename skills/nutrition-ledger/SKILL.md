@@ -5,6 +5,8 @@ description: Log food, hydration, and body weight into an auditable ChatGPT Libr
 
 # Nutrition Ledger
 
+For seven-day recaps, trends, adherence, or nutrition/fitness cross-references, route to the companion `weekly-review` skill after resolving the canonical ledger.
+
 Use this skill when the user wants to log, correct, inspect, or summarize their nutrition data. Keep the conversation natural, but store entries in the user's persistent ChatGPT Library files. The canonical ledger is a Library file; never require a local filesystem path, a local process, or manual spreadsheet maintenance.
 
 ## Library-native persistence
@@ -53,6 +55,7 @@ Natural-language report routing is mandatory:
 - Never manually reconstruct a daily report from raw JSON, a cache, or ad-hoc calculations when the canonical renderer is available.
 - The Progress section reports calories and protein against the user’s personal targets (when configured), never FDA Daily Values. `%DV`/reference percentages belong only in the micronutrient section.
 - If a personal target is unavailable, render the target as unavailable; do not substitute a generic DV.
+- Never use a hard-coded calorie or protein target (including 2,000 kcal). Targets must come from the persisted ledger or an explicit user-provided value.
 
 For micronutrient panels, append a clearly labeled nutrient section after the canonical daily panel. Show amount plus %DV/reference for each known nutrient and `unknown` for missing fields.
 
