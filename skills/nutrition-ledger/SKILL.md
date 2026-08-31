@@ -12,6 +12,9 @@ Use this skill when the user wants to log, correct, inspect, or summarize their 
 - Search Library by the canonical filenames or the user's selected Library reference before reading or mutating data.
 - Use the existing Library identity and current version when reading. Never create a duplicate copy when the canonical file already exists.
 - Read the canonical ledger before every report or mutation; do not rely on search snippets or a cached state file alone.
+- **Canon-first is mandatory:** resolve and read the canonical ledger before reading `Fitness_Ledger_Nutrition_Current_State.json` for any food-history, daily-food, correction, deletion, audit, or reporting request. The state file may only be used after canon as a derived cross-check.
+- If canonical entries and current state disagree, canonical active entries win. Flag the cache as stale/inconsistent and rebuild or reconcile it; never omit a canonical item merely because the state/cache does not contain it.
+- Never answer “show today’s foods”, “what did I eat today”, or equivalent from `Current_State` alone. Filter active canonical entries by the configured local date, then render from that reconciled canonical set.
 - For a mutation, preserve the ledger's Library identity and replace that same Library file only after validation and state reconciliation succeed.
 - Treat `Fitness_Ledger_Nutrition_Ledger.json` as canonical history and `Fitness_Ledger_Nutrition_Current_State.json` as rebuildable cache. The workbook is a reporting projection, not the operational source of truth.
 - If a required Library file cannot be resolved, ask the user to select or upload it. Do not silently create an unrelated local ledger.
@@ -62,6 +65,8 @@ Natural-language report routing is mandatory:
 - “Show today’s food,” “what did I eat today,” or equivalent requests map to `foods`.
 - “Today’s panel,” “today’s numbers,” or equivalent requests map to `panel`.
 - “Full nutrient panel” maps to `panel` followed by the labeled micronutrient section.
+- Before either `foods` or `panel`, read canonical history first, select active entries for the configured local date, and reconcile state from those entries. `Current_State` is never the primary read source.
+- If `Current_State` omits an active canonical item, include the canonical item in the report and mark/rebuild the state as stale rather than returning the incomplete cache view.
 - Never manually reconstruct a daily report from raw JSON, a cache, or ad-hoc calculations when the canonical renderer is available.
 - The Progress section reports calories and protein against the user’s personal targets (when configured), never FDA Daily Values. `%DV`/reference percentages belong only in the micronutrient section.
 - If a personal target is unavailable, render the target as unavailable; do not substitute a generic DV.
