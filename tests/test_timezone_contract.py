@@ -155,7 +155,7 @@ class TimezoneContractTests(unittest.TestCase):
         ledger = {"timezone": "America/New_York"}
         utc_now = dt.datetime(2026, 8, 30, 0, 30, tzinfo=dt.timezone.utc)
 
-        with self.assertRaisesRegex(ValueError, "America/New_York"):
+        with self.assertRaisesRegex(ValueError, "explicit date requires date_source=user_explicit"):
             tracker.resolve_entry_date(
                 ledger,
                 requested_date="2026-08-30",
