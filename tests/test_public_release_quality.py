@@ -67,6 +67,7 @@ class PublicReleaseQualityTests(unittest.TestCase):
         self.assertLessEqual(len(prompts), 3)
         self.assertEqual(len(prompts), len(set(prompts)))
         for prompt in prompts:
+            self.assertIsInstance(prompt, str)
             self.assertLessEqual(len(prompt), 128)
             self.assertNotIn("\n", prompt)
 
@@ -80,6 +81,7 @@ class PublicReleaseQualityTests(unittest.TestCase):
     def test_skills_are_library_native_and_do_not_require_local_runtime_execution(self) -> None:
         nutrition = (ROOT / "skills" / "nutrition-ledger" / "SKILL.md").read_text(encoding="utf-8")
         fitness = (ROOT / "skills" / "fitness-sync" / "SKILL.md").read_text(encoding="utf-8")
+        weekly = (ROOT / "skills" / "weekly-review" / "SKILL.md").read_text(encoding="utf-8")
         self.assertIn("ChatGPT Library", nutrition)
         self.assertIn("never require a local filesystem path, a local process", nutrition)
         self.assertIn("offline developer/test reference", nutrition)
@@ -90,6 +92,10 @@ class PublicReleaseQualityTests(unittest.TestCase):
         self.assertIn("offline developer/test reference", fitness)
         self.assertNotIn("python3 scripts/nutrition_tracker.py", nutrition)
         self.assertNotIn("python3 scripts/fitness_sync.py", fitness)
+        self.assertIn("ChatGPT Library", weekly)
+        self.assertIn("user-specific", weekly)
+        self.assertIn("unknown`, never as zero", weekly)
+        self.assertIn("2,000-kcal standard", weekly)
 
     def test_library_persistence_contract_is_bundled_and_referenced(self) -> None:
         contract = ROOT / "skills" / "nutrition-ledger" / "references" / "library-contract.md"
