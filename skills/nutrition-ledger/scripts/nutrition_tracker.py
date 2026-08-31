@@ -187,16 +187,20 @@ def current_local_date(ledger, now=None):
     return now_in_timezone(ledger, now).date().isoformat()
 
 
+def validate_date_argument_policy(requested_date=None, date_source="inferred"):
+    """Fail closed when a caller supplies a date without declaring its provenance."""
+    if requested_date is not None and date_source == "inferred":
+        raise ValueError(
+            "an explicit date requires date_source=user_explicit; "
+            "omit the date to derive it from the persisted IANA timezone"
+        )
+
+
 def resolve_entry_date(ledger, requested_date=None, date_source="inferred", now=None):
+    validate_date_argument_policy(requested_date, date_source)
     today = current_local_date(ledger, now)
     if not requested_date or requested_date == "today":
         return today
-    if date_source == "inferred" and requested_date != today:
-        raise ValueError(
-            f"inferred date {requested_date} does not match today in "
-            f"{timezone_name_for(ledger)} ({today}); "
-            "use date_source=user_explicit only when the user supplied the date"
-        )
     return requested_date
 
 
