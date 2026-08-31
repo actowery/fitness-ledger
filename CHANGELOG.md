@@ -1,9 +1,11 @@
 # Changelog
 
-## 0.2.2 - 2026-08-30
+## 0.4.0
 
-- Added the shareable `weekly-review` skill for seven-day nutrition, activity, fitness, and trend reviews.
-- Standardized weekly target comparisons to persisted or explicitly user-provided targets; removed hard-coded calorie assumptions.
+- Add deterministic food-master identity/version migration primitives.
+- Add nutrient coverage, confidence, enrichment, integrity, debt, longitudinal,
+  contribution, activity, resilience, and body-trend analysis helpers.
+- Migrate Library food-master metadata without rewriting historical nutrition.
 
 ## 0.2.1 - 2026-08-30
 

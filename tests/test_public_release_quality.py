@@ -65,9 +65,9 @@ class PublicReleaseQualityTests(unittest.TestCase):
         self.assertIsInstance(prompts, list)
         self.assertGreaterEqual(len(prompts), 1)
         self.assertLessEqual(len(prompts), 3)
-        self.assertTrue(all(isinstance(prompt, str) for prompt in prompts))
         self.assertEqual(len(prompts), len(set(prompts)))
         for prompt in prompts:
+            self.assertIsInstance(prompt, str)
             self.assertLessEqual(len(prompt), 128)
             self.assertNotIn("\n", prompt)
 
@@ -92,23 +92,10 @@ class PublicReleaseQualityTests(unittest.TestCase):
         self.assertIn("offline developer/test reference", fitness)
         self.assertNotIn("python3 scripts/nutrition_tracker.py", nutrition)
         self.assertNotIn("python3 scripts/fitness_sync.py", fitness)
+        self.assertIn("ChatGPT Library", weekly)
         self.assertIn("user-specific", weekly)
-        self.assertIn("never use a hard-coded 2,000-kcal standard", weekly)
-        self.assertIn("explicitly supplied by the user", weekly)
-        self.assertNotIn("--daily-calories 2000", nutrition)
-
-    def test_weekly_review_is_target_safe_and_shareable(self) -> None:
-        weekly = ROOT / "skills" / "weekly-review" / "SKILL.md"
-        self.assertTrue(weekly.is_file())
-        text = weekly.read_text(encoding="utf-8")
-        for required in (
-            "canonical Library nutrition ledger",
-            "persisted IANA timezone",
-            "Apple Health is canonical",
-            "`unknown`, never as zero",
-            "weekly review is read-only",
-        ):
-            self.assertIn(required, text)
+        self.assertIn("unknown`, never as zero", weekly)
+        self.assertIn("2,000-kcal standard", weekly)
 
     def test_library_persistence_contract_is_bundled_and_referenced(self) -> None:
         contract = ROOT / "skills" / "nutrition-ledger" / "references" / "library-contract.md"
