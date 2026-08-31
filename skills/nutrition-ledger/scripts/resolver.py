@@ -29,7 +29,7 @@ def resolve_candidates(query: Mapping[str, Any], candidates: Iterable[Mapping[st
     records = tuple(candidates)
     gtin = normalized_gtin(query)
     matching = [c for c in records if gtin and normalized_gtin(c) == gtin]
-    if not matching:
+    if not matching and not gtin:
         qname = _name(query)
         matching = [c for c in records if qname and _name(c) == qname]
     if not matching:

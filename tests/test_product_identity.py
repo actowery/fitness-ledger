@@ -53,6 +53,8 @@ class ProductIdentityTests(unittest.TestCase):
         self.assertEqual(result.status, "changed_formulation")
         new = version_master(self.shake, observed)
         self.assertEqual(new["supersedes_food_master_id"], "fm-shake-v1")
+        self.assertEqual(new["food_master_version"], 2)
+        self.assertNotEqual(new["food_master_id"], new["supersedes_food_master_id"])
         self.assertNotEqual(new["formulation_hash"], formulation_fingerprint(self.shake))
 
     def test_duplicate_masters_with_same_gtin_are_ambiguous(self):
@@ -63,6 +65,10 @@ class ProductIdentityTests(unittest.TestCase):
     def test_name_only_query_does_not_get_tier_a_exact_identity(self):
         result = resolve_identity({"product_name": "Chocolate Protein Shake"}, [self.shake])
         self.assertNotEqual(result.status, "exact")
+
+    def test_name_identity_can_match_master_that_has_gtin(self):
+        result = resolve_identity({"brand_owner": "Example Nutrition", "manufacturer": "Example Nutrition", "product_name": "Chocolate Protein Shake", "variant": "chocolate", "package_size": "14 fl oz"}, [self.shake])
+        self.assertEqual(result.status, "exact")
 
     def test_same_formulation_reuses_existing_version(self):
         result = version_master(self.shake, dict(self.shake))

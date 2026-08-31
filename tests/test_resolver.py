@@ -43,6 +43,10 @@ class ResolverTests(unittest.TestCase):
         ])
         self.assertEqual(result["source"], "verified_local")
 
+    def test_gtin_miss_does_not_fall_back_to_unrelated_name(self):
+        result = resolve_candidates({"gtin": "099999999999", "product_name": "Shake"}, [{"gtin": "012345678901", "product_name": "Shake", "source": "manufacturer"}])
+        self.assertEqual(result["status"], "unresolved")
+
 
 if __name__ == "__main__":
     unittest.main()

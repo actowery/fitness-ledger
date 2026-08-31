@@ -7,7 +7,7 @@
 - Baseline test result: 68 passed, 0 failed
 - Canonical personal artifacts: Library-backed ledger JSON, current-state cache, and workbook; not present in this public repository
 - Repository artifacts: Library-native skills, offline tracker, fitness reconciliation helpers, schemas, fixtures, and regression tests
-- Canonical rules preserved: JSON authority, unknown-not-zero semantics, field provenance, America/New_York day assignment, Apple Health canonical steps, tombstones/revisions, and no local-runtime dependency for ChatGPT execution
+- Canonical rules preserved: JSON authority, unknown-not-zero semantics, field provenance, persisted IANA timezone day assignment, Apple Health canonical steps, tombstones/revisions, and no local-runtime dependency for ChatGPT execution
 - Live personal-artifact migration was performed separately and is intentionally not represented with private record counts in this public report.
 
 ## Implemented slices
@@ -23,7 +23,7 @@
 9. Longitudinal summaries: mean, median, range, target-hit frequency, and coverage-aware interpretation.
 10. Nutrient contributions: deterministic source aggregation excluding unknowns and tombstones.
 11. Nutrition/activity joins: training/rest comparisons and future-leakage-safe pre-workout windows.
-17. Migration: repeatable non-destructive v2 fixture migration preserving IDs, values, revisions, and tombstones.
+12. Migration: repeatable non-destructive v2 fixture migration preserving IDs, values, revisions, and tombstones.
 
 ## Data quality and safety
 
@@ -34,7 +34,7 @@
 
 ## Test results
 
-- Final regression suite: **124 passed, 0 failed, 0 skipped**
+- Final regression suite: **125 passed, 0 failed, 0 skipped**
 - Public plugin validator: passed
 - `git diff --check`: passed
 

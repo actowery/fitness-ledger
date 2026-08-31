@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import copy
 import hashlib
-import json
+from datetime import datetime
 from typing import Any, Mapping
 
 from product_identity import formulation_fingerprint
@@ -12,6 +12,16 @@ from product_identity import formulation_fingerprint
 
 def _stable_id(food: str) -> str:
     return "fm-" + hashlib.sha256(food.strip().casefold().encode()).hexdigest()[:16]
+
+
+def _earliest_timestamp(values: list[str]) -> str | None:
+    parsed = []
+    for value in values:
+        try:
+            parsed.append((datetime.fromisoformat(value.replace("Z", "+00:00")), value))
+        except (TypeError, ValueError):
+            continue
+    return min(parsed, key=lambda pair: pair[0])[1] if parsed else None
 
 
 def migrate_ledger_v2(ledger: Mapping[str, Any]) -> dict[str, Any]:
@@ -28,7 +38,7 @@ def migrate_ledger_v2(ledger: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def enrich_food_masters(ledger: Mapping[str, Any]) -> dict[str, Any]:
-    """Fill identity/version metadata derivable from existing master data only."""
+    """Fill identity/version metadata from existing masters and their ledger entries."""
     migrated = copy.deepcopy(dict(ledger))
     entries_by_master: dict[str, list[Mapping[str, Any]]] = {}
     for entry in migrated.get("entries", []):
@@ -43,7 +53,7 @@ def enrich_food_masters(ledger: Mapping[str, Any]) -> dict[str, Any]:
         master.setdefault("source_product_id", master.get("source_url_or_id"))
         master.setdefault("source_url", master.get("source_url_or_id"))
         master.setdefault("label_effective_date", master.get("date_last_verified"))
-        master.setdefault("first_seen_at", min((e.get("created_at") for e in entries_by_master.get(master.get("food_master_id"), []) if e.get("created_at")), default=None))
+        master.setdefault("first_seen_at", _earliest_timestamp([e["created_at"] for e in entries_by_master.get(master.get("food_master_id"), []) if e.get("created_at")]))
         verified = master.get("date_last_verified")
         master.setdefault("last_verified_at", f"{verified}T00:00:00+00:00" if verified else None)
         master.setdefault("verification_source", master.get("source_type"))

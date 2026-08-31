@@ -72,6 +72,10 @@ def identity_key(record: Mapping[str, Any]) -> tuple[Any, ...]:
     )
 
 
+def _identity_without_gtin(record: Mapping[str, Any]) -> tuple[Any, ...]:
+    return identity_key(record)[1:]
+
+
 @dataclass(frozen=True)
 class IdentityResolution:
     status: str
@@ -95,7 +99,7 @@ def resolve_identity(query: Mapping[str, Any], masters: Iterable[Mapping[str, An
             return IdentityResolution("ambiguous", None, gtin_matches, "duplicate masters share the same GTIN")
 
     key = identity_key(query)
-    matches = tuple(m for m in records if identity_key(m) == key and key[0] is None)
+    matches = tuple(m for m in records if key[0] is None and _identity_without_gtin(m) == _identity_without_gtin(query))
     if len(matches) == 1:
         return IdentityResolution("exact", matches[0], matches, "exact non-GTIN identity match")
     if len(matches) > 1:
@@ -113,6 +117,10 @@ def version_master(master: Mapping[str, Any], observed: Mapping[str, Any]) -> di
         old["formulation_hash"] = old_hash
         return old
     new["formulation_hash"] = new_hash
-    new["supersedes_food_master_id"] = old.get("food_master_id")
+    prior_id = old.get("food_master_id")
+    new.setdefault("food_master_version", int(old.get("food_master_version") or 1) + 1)
+    if new.get("food_master_id") in (None, prior_id):
+        new["food_master_id"] = f"{prior_id or 'fm'}-v{new['food_master_version']}"
+    new["supersedes_food_master_id"] = prior_id
     new["status"] = new.get("status", "active")
     return new
