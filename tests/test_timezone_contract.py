@@ -155,7 +155,7 @@ class TimezoneContractTests(unittest.TestCase):
         ledger = {"timezone": "America/New_York"}
         utc_now = dt.datetime(2026, 8, 30, 0, 30, tzinfo=dt.timezone.utc)
 
-        with self.assertRaisesRegex(ValueError, "America/New_York"):
+        with self.assertRaisesRegex(ValueError, "explicit date requires date_source=user_explicit"):
             tracker.resolve_entry_date(
                 ledger,
                 requested_date="2026-08-30",
@@ -222,6 +222,20 @@ class TimezoneContractTests(unittest.TestCase):
             entry = ledger["entries"][-1]
             self.assertEqual(entry["date"], tracker.current_local_date(ledger))
             self.assertEqual(entry["date_source"], "inferred")
+
+    def test_explicit_date_requires_explicit_provenance_even_when_it_matches_today(self):
+        ledger = {"timezone": "America/New_York"}
+        with self.assertRaisesRegex(ValueError, "explicit date requires date_source=user_explicit"):
+            tracker.validate_date_argument_policy("2026-08-30", "inferred")
+
+    def test_omitted_date_is_derived_from_persisted_timezone_not_host_date(self):
+        ledger = {"timezone": "America/New_York"}
+        utc_now = dt.datetime(2026, 8, 31, 0, 30, tzinfo=dt.timezone.utc)
+
+        self.assertEqual(
+            tracker.resolve_entry_date(ledger, requested_date=None, date_source="inferred", now=utc_now),
+            "2026-08-30",
+        )
 
     def test_cli_rejects_mismatched_inferred_date_before_mutation(self):
         with tempfile.TemporaryDirectory() as directory:
