@@ -23,6 +23,7 @@ Use this skill when the user wants to log, correct, inspect, or summarize their 
 
 - Treat the JSON ledger as canonical; a daily state file is rebuildable cache.
 - Require a persisted IANA timezone (for example, `Europe/London`) before assigning dates. Offer a detected local timezone only as a setup suggestion; never infer it from the runtime clock or silently default to a region.
+- Date guard: when a logging command omits `--date`, derive the date inside the tracker from the persisted IANA timezone. If a caller supplies `--date`, it must also pass `--date-source user_explicit`; an inferred or host-derived date is rejected before mutation, even if it happens to equal local today. Historical dates are therefore an explicit user action, not a runtime default.
 - Preserve corrections and deletions in the audit log. Do not silently overwrite history.
 - Track nutrient provenance per field: A label/direct, B authoritative reference, C reconstructed estimate, D unknown.
 - Missing is `unknown`, not zero. Retain source-declared zeroes.
