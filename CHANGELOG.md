@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.2 - 2026-09-01
+
+- Clarify DRV % precedence rule in skill contract
+
 ## 1.2.1 - 2026-09-01
 
 - Add DRV percentages to standardized nutrition panels.

@@ -148,7 +148,7 @@ Before either report, resolve canonical history first and select active entries 
 
 For `foods`, show `Daily Totals` and the `Foods` table only.
 
-For `panel`, show `Daily Totals`, `Foods`, and `Micronutrients`. The `Target` column uses personal calorie/protein/carbs/fat/fiber targets when configured. The micronutrient `DRV %` column uses `targets.daily_nutrient_targets` as the denominator when configured, reports `not set` when no reference target exists, reports `unknown` when the amount is unknown, and never converts missing values to zero.
+For `panel`, show `Daily Totals`, `Foods`, and `Micronutrients`. The `Target` column uses personal calorie/protein/carbs/fat/fiber targets when configured. The micronutrient `DRV %` column uses `targets.daily_nutrient_targets` as the denominator when configured. The column renders as `not set` when no reference target exists for that nutrient (even if the amount is also unknown), and as `unknown` only when a reference target is configured but the amount has not been tracked. Missing values are never converted to zero.
 
 For micronutrients, show every tracked nutrient amount, DRV context, and `unknown` for missing fields. Do not omit a micronutrient just because it is unknown.
 
