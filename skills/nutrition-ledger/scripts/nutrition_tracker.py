@@ -139,6 +139,32 @@ def _target_progress(value, target, field):
     return f"{_amount(current, field)} / {_amount(target_value, field)} ({_amount(remaining, field)} remaining)"
 
 
+def _target_for(ledger, field):
+    targets = ledger.get("targets", {})
+    direct_targets = {
+        "calories": "daily_calories",
+        "protein_g": "daily_protein_g",
+        "carbohydrates_g": "daily_carbohydrates_g",
+        "fat_g": "daily_fat_g",
+        "fiber_g": "daily_fiber_g",
+    }
+    direct_key = direct_targets.get(field)
+    if direct_key and targets.get(direct_key) is not None:
+        return targets.get(direct_key)
+    return targets.get("daily_nutrient_targets", {}).get(field)
+
+
+def _reference_percent(value, target):
+    if target is None:
+        return "not set"
+    if value is None:
+        return "unknown"
+    target_value = float(target)
+    if target_value == 0:
+        return "at 0 target" if float(value) == 0 else "above 0 target"
+    return f"{float(value) / target_value * 100:,.0f}%"
+
+
 def _markdown_table(headers, rows):
     def cell(value):
         text = str(value)
@@ -193,23 +219,22 @@ def _food_rows(rows):
 
 
 def _daily_macro_rows(ledger, totals, rows, date):
-    targets = ledger.get("targets", {})
     water_oz = totals.get("water_oz")
     hydration = "unknown" if water_oz is None else f"{round(float(water_oz) * 29.5735):,.0f} mL ({float(water_oz):,.1f} fl oz)"
     weight = weight_for(ledger, date)
     return [
         ["Entries", str(len(rows)), "active foods only"],
         ["Weight", f"{float(weight):,.1f} lb" if weight is not None else "not logged", "body weight"],
-        ["Calories", _amount(totals.get("calories"), "calories"), _target_progress(totals.get("calories"), targets.get("daily_calories"), "calories")],
-        ["Protein", _amount(totals.get("protein_g"), "protein_g"), _target_progress(totals.get("protein_g"), targets.get("daily_protein_g"), "protein_g")],
-        ["Carbs", _amount(totals.get("carbohydrates_g"), "carbohydrates_g"), _target_progress(totals.get("carbohydrates_g"), targets.get("daily_carbohydrates_g"), "carbohydrates_g")],
-        ["Fat", _amount(totals.get("fat_g"), "fat_g"), _target_progress(totals.get("fat_g"), targets.get("daily_fat_g"), "fat_g")],
-        ["Fiber", _amount(totals.get("fiber_g"), "fiber_g"), _target_progress(totals.get("fiber_g"), targets.get("daily_fiber_g"), "fiber_g")],
+        ["Calories", _amount(totals.get("calories"), "calories"), _target_progress(totals.get("calories"), _target_for(ledger, "calories"), "calories")],
+        ["Protein", _amount(totals.get("protein_g"), "protein_g"), _target_progress(totals.get("protein_g"), _target_for(ledger, "protein_g"), "protein_g")],
+        ["Carbs", _amount(totals.get("carbohydrates_g"), "carbohydrates_g"), _target_progress(totals.get("carbohydrates_g"), _target_for(ledger, "carbohydrates_g"), "carbohydrates_g")],
+        ["Fat", _amount(totals.get("fat_g"), "fat_g"), _target_progress(totals.get("fat_g"), _target_for(ledger, "fat_g"), "fat_g")],
+        ["Fiber", _amount(totals.get("fiber_g"), "fiber_g"), _target_progress(totals.get("fiber_g"), _target_for(ledger, "fiber_g"), "fiber_g")],
         ["Hydration", hydration, "tracked drinking water"],
     ]
 
 
-def _micronutrient_rows(rows):
+def _micronutrient_rows(ledger, rows):
     core = set(CORE_NUTRIENTS) | {"water_oz"}
     table_rows = []
     for field in DISPLAY_NUTRIENTS:
@@ -217,7 +242,7 @@ def _micronutrient_rows(rows):
             continue
         values = [entry.get(field) for entry in rows if entry.get(field) is not None]
         total = round(sum(values), 2) if values else None
-        table_rows.append([NUTRIENT_LABELS.get(field, field), _amount(total, field)])
+        table_rows.append([NUTRIENT_LABELS.get(field, field), _amount(total, field), _reference_percent(total, _target_for(ledger, field))])
     return table_rows
 
 
@@ -240,7 +265,7 @@ def render_daily_report(ledger, date, view="panel"):
 
     if view == "panel":
         lines.extend(["", "Micronutrients"])
-        lines.extend(_markdown_table(["Nutrient", "Amount"], _micronutrient_rows(rows)))
+        lines.extend(_markdown_table(["Nutrient", "Amount", "DRV %"], _micronutrient_rows(ledger, rows)))
 
     lines.extend([
         "",
@@ -307,7 +332,7 @@ def render_weekly_totals(ledger, start_date, end_date):
     lines.extend(["", "Weekly Totals"])
     lines.extend(_markdown_table(["Metric", "Amount", "Target"], _daily_macro_rows(ledger, totals, rows, end_date)))
     lines.extend(["", "Micronutrients"])
-    lines.extend(_markdown_table(["Nutrient", "Amount"], _micronutrient_rows(rows)))
+    lines.extend(_markdown_table(["Nutrient", "Amount", "DRV %"], _micronutrient_rows(ledger, rows)))
     lines.extend(["", "Data quality", "Active entries only. Unknown means untracked, not zero."])
     return "\n".join(lines)
 

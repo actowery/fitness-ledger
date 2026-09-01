@@ -18,7 +18,20 @@ class NutritionReportingTests(unittest.TestCase):
     def ledger(self):
         return {
             "timezone": "America/New_York",
-            "targets": {"daily_calories": 1900, "daily_protein_g": 160},
+            "targets": {
+                "daily_calories": 1900,
+                "daily_protein_g": 160,
+                "daily_nutrient_targets": {
+                    "carbohydrates_g": 170,
+                    "fat_g": 65,
+                    "fiber_g": 30,
+                    "cholesterol_mg": 300,
+                    "sodium_mg": 2300,
+                    "vitamin_c_mg": 90,
+                    "vitamin_d_mcg": 20,
+                    "trans_fat_g": 0,
+                },
+            },
             "nutrient_units": {
                 "calories": "kcal", "protein_g": "g", "carbohydrates_g": "g",
                 "fat_g": "g", "fiber_g": "g", "water_oz": "fl oz",
@@ -39,28 +52,41 @@ class NutritionReportingTests(unittest.TestCase):
         self.assertTrue(report.startswith("Nutrition Panel | 2026-08-30 | America/New_York\n\nDaily Totals\n"))
         self.assertIn("| Metric | Amount | Target |", report)
         self.assertIn("| Food |", report)
-        self.assertIn("Micronutrients\n| Nutrient | Amount |", report)
-        self.assertIn("| Cholesterol | 372.00 mg |", report)
-        self.assertIn("| Sodium | 700.00 mg |", report)
-        self.assertIn("| Vitamin C | 74.00 mg |", report)
+        self.assertIn("Micronutrients\n| Nutrient | Amount | DRV % |", report)
+        self.assertIn("| Cholesterol | 372.00 mg | 124% |", report)
+        self.assertIn("| Sodium | 700.00 mg | 30% |", report)
+        self.assertIn("| Vitamin C | 74.00 mg | 82% |", report)
         self.assertNotIn("protein credit", report.lower())
 
-    def test_progress_uses_personal_targets_not_generic_daily_values(self):
+    def test_macro_progress_uses_personal_targets(self):
         report = tracker.render_daily_report(self.ledger(), "2026-08-30", view="panel")
 
         self.assertIn("| Calories | 439 kcal | 439 kcal / 1,900 kcal (1,461 kcal remaining) |", report)
         self.assertIn("| Protein | 12.90 g | 12.90 g / 160.00 g (147.10 g remaining) |", report)
-        self.assertNotIn("%", report)
         self.assertNotIn("Daily Value", report)
+
+    def test_panel_keeps_full_standardized_sections(self):
+        report = tracker.render_daily_report(self.ledger(), "2026-08-30", view="panel")
+
+        self.assertLess(report.index("Daily Totals\n| Metric | Amount | Target |"), report.index("Foods\n| Meal | Food | Amount | Calories | Protein | Carbs | Fat | Fiber |"))
+        self.assertLess(report.index("Foods\n| Meal | Food | Amount | Calories | Protein | Carbs | Fat | Fiber |"), report.index("Micronutrients\n| Nutrient | Amount | DRV % |"))
+        self.assertLess(report.index("Micronutrients\n| Nutrient | Amount | DRV % |"), report.index("Data quality\nActive entries only. Unknown means untracked, not zero."))
+        self.assertIn("| Biotin | unknown | not set |", report)
+        self.assertIn("| Vitamin D | unknown | unknown |", report)
+        self.assertIn("| Trans fat | unknown | unknown |", report)
+        ledger = self.ledger()
+        ledger["entries"][0]["trans_fat_g"] = 0.1
+        report = tracker.render_daily_report(ledger, "2026-08-30", view="panel")
+        self.assertIn("| Trans fat | 0.10 g | above 0 target |", report)
 
     def test_daily_report_always_contains_item_metrics_meal_subtotals_and_daily_progress(self):
         report = tracker.render_daily_report(self.ledger(), "2026-08-30", view="panel")
 
         self.assertIn("| Breakfast | Eggs (Farm) | 2 large | 140 kcal | 12.00 g | 1.00 g | 10.00 g | 0.00 g |", report)
         self.assertIn("| Lunch | Mystery soup | 1 bowl | 250 kcal | unknown | unknown | unknown | unknown |", report)
-        self.assertIn("| Carbs | 13.00 g | not set |", report)
-        self.assertIn("| Fat | 10.40 g | not set |", report)
-        self.assertIn("| Fiber | 2.40 g | not set |", report)
+        self.assertIn("| Carbs | 13.00 g | 13.00 g / 170.00 g (157.00 g remaining) |", report)
+        self.assertIn("| Fat | 10.40 g | 10.40 g / 65.00 g (54.60 g remaining) |", report)
+        self.assertIn("| Fiber | 2.40 g | 2.40 g / 30.00 g (27.60 g remaining) |", report)
 
     def test_foods_report_contains_item_metrics_and_meal_subtotals(self):
         report = tracker.render_daily_report(self.ledger(), "2026-08-30", view="foods")
@@ -158,10 +184,10 @@ class NutritionReportingTests(unittest.TestCase):
         self.assertIn("| 2026-08-30 | 4 | 439 kcal | 12.90 g | 13.00 g | 10.40 g | 2.40 g | 16.0 fl oz |", report)
         self.assertIn("| 2026-08-31 | 1 | 100 kcal | 4.00 g | 18.00 g | 1.00 g | 2.00 g | unknown |", report)
         self.assertIn("Weekly Totals\n| Metric | Amount | Target |", report)
-        self.assertIn("Micronutrients\n| Nutrient | Amount |", report)
-        self.assertIn("| Cholesterol | 372.00 mg |", report)
-        self.assertIn("| Sodium | 700.00 mg |", report)
-        self.assertIn("| Vitamin C | 74.00 mg |", report)
+        self.assertIn("Micronutrients\n| Nutrient | Amount | DRV % |", report)
+        self.assertIn("| Cholesterol | 372.00 mg | 124% |", report)
+        self.assertIn("| Sodium | 700.00 mg | 30% |", report)
+        self.assertIn("| Vitamin C | 74.00 mg | 82% |", report)
 
 
 if __name__ == "__main__":
