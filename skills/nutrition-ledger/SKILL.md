@@ -42,6 +42,7 @@ When operating in a Codex/developer environment with local ledger artifacts, use
 - Import archive setup: `nutrition_tracker.py --ledger Fitness_Ledger_Nutrition_Ledger.json setup-import --source-dir <package-dir>`. This promotes `IMPORT_Nutrition_Ledger.json` and `IMPORT_Nutrition_Current_State.json` to the canonical working filenames. Use `--force` only when the user explicitly wants to replace existing working copies.
 - Read-only reports: `--state` is optional for `day`, `daily-totals`, `weekly-totals`, `panel`, `foods`, and `validate`; the script derives the sibling current-state filename from `--ledger`.
 - Standard report commands: use `daily-totals --date <YYYY-MM-DD>`, `weekly-totals --start-date <YYYY-MM-DD> --end-date <YYYY-MM-DD>`, `foods --date <YYYY-MM-DD>`, and `panel --date <YYYY-MM-DD>`. Do not hand-format a different layout.
+- Target updates: use `targets --daily-calories <kcal>`, `--daily-protein-g <g>`, `--daily-carbohydrates-g <g>`, `--daily-fat-g <g>`, and/or `--daily-fiber-g <g>` to persist personal daily targets after setup.
 - Raw entry schema: run `entry-template --meal <meal> --food-product <name>` to get the supported JSON payload for `add --fields`.
 - Food-master matching: run `food-master-find --query "<terms>" --summary` first. Use the full output only when provenance details are needed.
 - Portion scaling: prefer `add-from-master --amount-grams <g>` when the selected master has `serving_weight_g`; prefer `--servings <n>` for serving counts. Use `--factor` only when neither human-scale option fits.
@@ -152,11 +153,15 @@ For `panel`, show `Daily Totals`, `Foods`, and `Micronutrients`. The `Target` co
 
 For micronutrients, show every tracked nutrient amount, DRV context, and `unknown` for missing fields. Do not omit a micronutrient just because it is unknown.
 
+Vitamin labels must include both the standard letter/number designation and the common name, such as `Vitamin B1 (Thiamin)`, `Vitamin B2 (Riboflavin)`, `Vitamin B3 (Niacin)`, `Vitamin B5 (Pantothenic acid)`, `Vitamin B6`, `Vitamin B7 (Biotin)`, `Vitamin B9 (Folate)`, and `Vitamin B12 (Cobalamin)`.
+
 ## Conversational output after a successful log
 
 Keep simple mutations concise. For a food, hydration, or weight log, show the confirmed mutation and the updated `Daily Totals` table only; do not print the full foods and micronutrients tables unless the user asks for a panel or report. When a panel or report is requested, the hard verbatim-report invariant above overrides concise-output preferences. Include explicit persistence/read-back confirmation including the verified ledger revision when available. Material estimates, assumptions, or unresolved identity issues may be included briefly under `Data quality`.
 
 Corrections, deletions, target changes, and other mutations should use the same concise confirmation pattern unless the user requests a full report.
+
+When a mutation uses an external product page, food database, or other web reference, append a `Sources` section after `Data quality` with compact Markdown links to the sources used for the logged item. Keep source links at the bottom of the response and distinguish product-label sources from estimates when relevant. Do not invent URLs; if no link is available, name the source without a fabricated link.
 
 ## Safety boundary
 

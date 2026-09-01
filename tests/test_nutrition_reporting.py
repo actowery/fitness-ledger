@@ -56,6 +56,8 @@ class NutritionReportingTests(unittest.TestCase):
         self.assertIn("| Cholesterol | 372.00 mg | 124% |", report)
         self.assertIn("| Sodium | 700.00 mg | 30% |", report)
         self.assertIn("| Vitamin C | 74.00 mg | 82% |", report)
+        self.assertIn("| Vitamin B2 (Riboflavin) |", report)
+        self.assertIn("| Vitamin B12 (Cobalamin) |", report)
         self.assertNotIn("protein credit", report.lower())
 
     def test_macro_progress_uses_personal_targets(self):
@@ -71,7 +73,7 @@ class NutritionReportingTests(unittest.TestCase):
         self.assertLess(report.index("Daily Totals\n| Metric | Amount | Target |"), report.index("Foods\n| Meal | Food | Amount | Calories | Protein | Carbs | Fat | Fiber |"))
         self.assertLess(report.index("Foods\n| Meal | Food | Amount | Calories | Protein | Carbs | Fat | Fiber |"), report.index("Micronutrients\n| Nutrient | Amount | DRV % |"))
         self.assertLess(report.index("Micronutrients\n| Nutrient | Amount | DRV % |"), report.index("Data quality\nActive entries only. Unknown means untracked, not zero."))
-        self.assertIn("| Biotin | unknown | not set |", report)
+        self.assertIn("| Vitamin B7 (Biotin) | unknown | not set |", report)
         self.assertIn("| Vitamin D | unknown | unknown |", report)
         self.assertIn("| Trans fat | unknown | unknown |", report)
         ledger = self.ledger()

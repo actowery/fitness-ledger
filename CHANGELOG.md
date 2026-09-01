@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.4 - 2026-09-01
+
+- Add vitamin letter and number labels to nutrition panels.
+
 ## 1.2.3 - 2026-09-01
 
 - Enforce verbatim nutrition report rendering.
