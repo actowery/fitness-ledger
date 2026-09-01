@@ -92,7 +92,7 @@ Initialization may store a preferred daily combined synchronization time. Do not
 
 ## Daily reports
 
-All human-readable nutrition reports use one stable Markdown table contract. No conversational response should vary the style, section names, column order, units, or handling of unknowns unless the user explicitly asks for raw JSON or a one-off export format.
+All human-readable nutrition reports use one stable Markdown table contract. No conversational response should vary the style, section names, column order, units, or handling of unknowns unless the user explicitly asks for raw JSON or a one-off export format. For `panel`, `foods`, `daily-totals`, and `weekly-totals`, relay the rendered report in full; do not compress it into prose, a code-block summary, partial highlights, or "key foods" unless the user explicitly asks for a summary.
 
 Canonical report grammar:
 
@@ -122,8 +122,8 @@ Foods
 | --- | --- | --- | --- | --- | --- | --- | --- |
 
 Micronutrients
-| Nutrient | Amount |
-| --- | --- |
+| Nutrient | Amount | DRV % |
+| --- | --- | --- |
 ```
 
 Weekly totals add this exact leading table before the weekly totals and micronutrient tables:
@@ -148,9 +148,9 @@ Before either report, resolve canonical history first and select active entries 
 
 For `foods`, show `Daily Totals` and the `Foods` table only.
 
-For `panel`, show `Daily Totals`, `Foods`, and `Micronutrients`. The `Target` column uses personal calorie/protein/carbs/fat/fiber targets when configured; `%DV` belongs only in a future micronutrient reference column, not personal-target progress.
+For `panel`, show `Daily Totals`, `Foods`, and `Micronutrients`. The `Target` column uses personal calorie/protein/carbs/fat/fiber targets when configured. The micronutrient `DRV %` column uses `targets.daily_nutrient_targets` as the denominator when configured, reports `not set` when no reference target exists, reports `unknown` when the amount is unknown, and never converts missing values to zero.
 
-For micronutrients, show every tracked nutrient amount and `unknown` for missing fields. Do not omit a micronutrient just because it is unknown.
+For micronutrients, show every tracked nutrient amount, DRV context, and `unknown` for missing fields. Do not omit a micronutrient just because it is unknown.
 
 ## Conversational output after a successful log
 
