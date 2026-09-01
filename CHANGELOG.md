@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.0 - 2026-09-01
+
+- Replace the impossible skills-only assumption of in-place ChatGPT Library replacement with verified revisioned successor artifacts.
+- Add deterministic `_fitness_ledger_revision` fingerprinting, supersession, and canonical-selection helpers.
+- Fail closed when multiple different artifacts claim the same latest revision instead of guessing by filename or timestamp.
+- Require Library read-back of the generated successor before a nutrition mutation may be reported as persisted.
+- Preserve legacy/import ledgers as revision-zero canonical roots for migration compatibility.
+
 ## 1.0.2
 
 - Bump package and plugin metadata versions to 1.0.2.
