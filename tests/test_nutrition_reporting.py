@@ -66,6 +66,24 @@ Active entries only. Unknown means untracked, not zero.""")
         self.assertNotIn("%", report)
         self.assertNotIn("Daily Value", report)
 
+    def test_daily_report_always_contains_item_metrics_meal_subtotals_and_daily_progress(self):
+        report = tracker.render_daily_report(self.ledger(), "2026-08-30", view="panel")
+
+        self.assertIn("Breakfast — 1 item | 140 kcal | P 12.0 g", report)
+        self.assertIn("- Eggs (Farm), 2 large — 140 kcal | P 12.0 g | C 1.0 g | F 10.0 g | Fi 0.0 g", report)
+        self.assertIn("Lunch — 1 item | 250 kcal | P unknown", report)
+        self.assertIn("Calories: 439 / 1,900 kcal (1,461 remaining)", report)
+        self.assertIn("Protein: 12.9 / 160.0 g (147.1 remaining)", report)
+        self.assertIn("Carbs: 13.0 g | Fat: 10.4 g | Fiber: 2.4 g", report)
+
+    def test_foods_report_contains_item_metrics_and_meal_subtotals(self):
+        report = tracker.render_daily_report(self.ledger(), "2026-08-30", view="foods")
+
+        self.assertIn("Breakfast — 1 item | 140 kcal | P 12.0 g", report)
+        self.assertIn("- Eggs (Farm), 2 large — 140 kcal | P 12.0 g | C 1.0 g | F 10.0 g | Fi 0.0 g", report)
+        self.assertIn("Lunch — 1 item | 250 kcal | P unknown", report)
+        self.assertNotIn("Progress\n", report)
+
     def test_foods_view_reuses_exact_meal_and_food_grammar(self):
         report = tracker.render_daily_report(self.ledger(), "2026-08-30", view="foods")
 
