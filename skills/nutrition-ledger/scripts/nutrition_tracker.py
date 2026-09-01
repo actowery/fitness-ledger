@@ -23,6 +23,51 @@ DEFAULT_NUTRIENTS = CORE_NUTRIENTS + (
     "polyunsaturated_fat_g", "water_g", "water_oz",
 )
 MEAL_ORDER = ("Breakfast", "Lunch", "Dinner", "Snacks", "Drinks", "Other")
+DISPLAY_NUTRIENTS = tuple(n for n in DEFAULT_NUTRIENTS if n != "protein_credit_g")
+NUTRIENT_LABELS = {
+    "calories": "Calories",
+    "protein_g": "Protein",
+    "carbohydrates_g": "Carbs",
+    "fat_g": "Fat",
+    "fiber_g": "Fiber",
+    "total_sugars_g": "Total sugars",
+    "added_sugars_g": "Added sugars",
+    "saturated_fat_g": "Saturated fat",
+    "trans_fat_g": "Trans fat",
+    "cholesterol_mg": "Cholesterol",
+    "sodium_mg": "Sodium",
+    "potassium_mg": "Potassium",
+    "calcium_mg": "Calcium",
+    "iron_mg": "Iron",
+    "magnesium_mg": "Magnesium",
+    "phosphorus_mg": "Phosphorus",
+    "zinc_mg": "Zinc",
+    "copper_mg": "Copper",
+    "manganese_mg": "Manganese",
+    "selenium_mcg": "Selenium",
+    "vitamin_a_mcg_rae": "Vitamin A",
+    "vitamin_c_mg": "Vitamin C",
+    "vitamin_d_mcg": "Vitamin D",
+    "vitamin_e_mg": "Vitamin E",
+    "vitamin_k_mcg": "Vitamin K",
+    "thiamin_mg": "Thiamin",
+    "riboflavin_mg": "Riboflavin",
+    "niacin_mg": "Niacin",
+    "pantothenic_acid_mg": "Pantothenic acid",
+    "vitamin_b6_mg": "Vitamin B6",
+    "biotin_mcg": "Biotin",
+    "folate_mcg_dfe": "Folate",
+    "folic_acid_mcg": "Folic acid",
+    "vitamin_b12_mcg": "Vitamin B12",
+    "choline_mg": "Choline",
+    "iodine_mcg": "Iodine",
+    "chromium_mcg": "Chromium",
+    "molybdenum_mcg": "Molybdenum",
+    "monounsaturated_fat_g": "Monounsaturated fat",
+    "polyunsaturated_fat_g": "Polyunsaturated fat",
+    "water_g": "Water",
+    "water_oz": "Hydration",
+}
 
 
 def _meal_name(entry):
@@ -57,6 +102,57 @@ def _kcal(value):
     return "unknown kcal" if value is None else f"{_whole(value)} kcal"
 
 
+def _nutrient_unit(field):
+    if field == "calories":
+        return "kcal"
+    if field.endswith("_g"):
+        return "g"
+    if field.endswith("_mg"):
+        return "mg"
+    if field.endswith("_mcg") or field.endswith("_mcg_rae") or field.endswith("_mcg_dfe"):
+        return "mcg"
+    if field.endswith("_oz"):
+        return "fl oz"
+    return ""
+
+
+def _amount(value, field):
+    if value is None:
+        return "unknown"
+    numeric = float(value)
+    if field == "calories":
+        return f"{numeric:,.0f} kcal"
+    if field.endswith("_oz"):
+        return f"{numeric:,.1f} fl oz"
+    unit = _nutrient_unit(field)
+    if unit:
+        return f"{numeric:,.2f} {unit}"
+    return f"{numeric:,.2f}"
+
+
+def _target_progress(value, target, field):
+    if target is None:
+        return "not set"
+    current = float(value or 0)
+    target_value = float(target)
+    remaining = target_value - current
+    return f"{_amount(current, field)} / {_amount(target_value, field)} ({_amount(remaining, field)} remaining)"
+
+
+def _markdown_table(headers, rows):
+    def cell(value):
+        text = str(value)
+        return text.replace("\\", "\\\\").replace("|", "\\|").replace("\r", " ").replace("\n", " ")
+
+    lines = [
+        "| " + " | ".join(cell(header) for header in headers) + " |",
+        "| " + " | ".join("---" for _ in headers) + " |",
+    ]
+    for row in rows:
+        lines.append("| " + " | ".join(cell(value) for value in row) + " |")
+    return lines
+
+
 def _complete_total(rows, field):
     values = [row.get(field) for row in rows]
     if not rows or any(value is None for value in values):
@@ -71,18 +167,58 @@ def _meal_sections(rows):
     return [(name, grouped[name]) for name in MEAL_ORDER if grouped[name]]
 
 
-def _food_line(entry):
+def _food_label(entry):
     label = entry.get("food_product") or "Unnamed food"
     brand = entry.get("brand_restaurant_source")
     if brand:
         label += f" ({brand})"
-    amount = entry.get("amount_weight") or "amount not logged"
-    return (
-        f"- {label}, {amount} — {_kcal(entry.get('calories'))} | "
-        f"P {_grams(entry.get('protein_g'))} | "
-        f"C {_grams(entry.get('carbohydrates_g'))} | "
-        f"F {_grams(entry.get('fat_g'))} | Fi {_grams(entry.get('fiber_g'))}"
-    )
+    return label
+
+
+def _food_rows(rows):
+    table_rows = []
+    for meal, entries in _meal_sections(rows):
+        for entry in entries:
+            table_rows.append([
+                meal,
+                _food_label(entry),
+                entry.get("amount_weight") or "unknown",
+                _amount(entry.get("calories"), "calories"),
+                _amount(entry.get("protein_g"), "protein_g"),
+                _amount(entry.get("carbohydrates_g"), "carbohydrates_g"),
+                _amount(entry.get("fat_g"), "fat_g"),
+                _amount(entry.get("fiber_g"), "fiber_g"),
+            ])
+    return table_rows
+
+
+def _daily_macro_rows(ledger, totals, rows, date):
+    targets = ledger.get("targets", {})
+    water_oz = totals.get("water_oz")
+    hydration = "unknown" if water_oz is None else f"{round(float(water_oz) * 29.5735):,.0f} mL ({float(water_oz):,.1f} fl oz)"
+    weight = weight_for(ledger, date)
+    return [
+        ["Entries", str(len(rows)), "active foods only"],
+        ["Weight", f"{float(weight):,.1f} lb" if weight is not None else "not logged", "body weight"],
+        ["Calories", _amount(totals.get("calories"), "calories"), _target_progress(totals.get("calories"), targets.get("daily_calories"), "calories")],
+        ["Protein", _amount(totals.get("protein_g"), "protein_g"), _target_progress(totals.get("protein_g"), targets.get("daily_protein_g"), "protein_g")],
+        ["Carbs", _amount(totals.get("carbohydrates_g"), "carbohydrates_g"), _target_progress(totals.get("carbohydrates_g"), targets.get("daily_carbohydrates_g"), "carbohydrates_g")],
+        ["Fat", _amount(totals.get("fat_g"), "fat_g"), _target_progress(totals.get("fat_g"), targets.get("daily_fat_g"), "fat_g")],
+        ["Fiber", _amount(totals.get("fiber_g"), "fiber_g"), _target_progress(totals.get("fiber_g"), targets.get("daily_fiber_g"), "fiber_g")],
+        ["Hydration", hydration, "tracked drinking water"],
+    ]
+
+
+def _micronutrient_rows(rows):
+    core = set(CORE_NUTRIENTS) | {"water_oz"}
+    table_rows = []
+    for field in DISPLAY_NUTRIENTS:
+        if field in core:
+            continue
+        values = [entry.get(field) for entry in rows if entry.get(field) is not None]
+        total = round(sum(values), 2) if values else None
+        table_rows.append([NUTRIENT_LABELS.get(field, field), _amount(total, field)])
+    return table_rows
 
 
 def render_daily_report(ledger, date, view="panel"):
@@ -92,63 +228,87 @@ def render_daily_report(ledger, date, view="panel"):
     totals, rows = totals_for(ledger, date)
     timezone = timezone_name_for(ledger)
     heading = "Nutrition Panel" if view == "panel" else "Foods Eaten"
-    weight = weight_for(ledger, date)
-    lines = [
-        f"{heading} — {date} ({timezone})",
-        f"Entries: {len(rows)} | Weight: {f'{float(weight):.1f} lb' if weight is not None else 'not logged'}",
-        "",
-    ]
+    lines = [f"{heading} | {date} | {timezone}", ""]
+    lines.append("Daily Totals")
+    lines.extend(_markdown_table(["Metric", "Amount", "Target"], _daily_macro_rows(ledger, totals, rows, date)))
+    lines.extend(["", "Foods"])
+    food_rows = _food_rows(rows)
+    if food_rows:
+        lines.extend(_markdown_table(["Meal", "Food", "Amount", "Calories", "Protein", "Carbs", "Fat", "Fiber"], food_rows))
+    else:
+        lines.extend(_markdown_table(["Meal", "Food", "Amount", "Calories", "Protein", "Carbs", "Fat", "Fiber"], [["-", "No foods logged", "-", "unknown", "unknown", "unknown", "unknown", "unknown"]]))
 
     if view == "panel":
-        calories = totals.get("calories") or 0
-        protein = totals.get("protein_g") or 0
-        calorie_target = ledger.get("targets", {}).get("daily_calories")
-        protein_target = ledger.get("targets", {}).get("daily_protein_g")
-        calorie_progress = (
-            f"{_whole(calories)} / {_whole(calorie_target)} kcal ({_whole(calorie_target - calories)} remaining)"
-            if calorie_target is not None else _kcal(totals.get("calories"))
-        )
-        protein_progress = (
-            f"{float(protein):.1f} / {float(protein_target):.1f} g ({float(protein_target - protein):.1f} remaining)"
-            if protein_target is not None else _grams(totals.get("protein_g"))
-        )
-        water_oz = totals.get("water_oz")
-        hydration = "not logged" if water_oz is None else f"{round(float(water_oz) * 29.5735):,.0f} mL ({float(water_oz):.1f} fl oz)"
-        lines.extend([
-            "Progress",
-            f"Calories: {calorie_progress}",
-            f"Protein: {protein_progress}",
-            f"Carbs: {_grams(totals.get('carbohydrates_g'))} | Fat: {_grams(totals.get('fat_g'))} | Fiber: {_grams(totals.get('fiber_g'))}",
-            f"Hydration: {hydration}",
-            "",
-        ])
-
-    lines.append("Meals")
-    sections = _meal_sections(rows)
-    if not sections:
-        lines.append("No foods logged.")
-    else:
-        for meal, entries in sections:
-            item_word = "item" if len(entries) == 1 else "items"
-            lines.append(f"{meal} — {len(entries)} {item_word} | {_kcal(_complete_total(entries, 'calories'))} | P {_grams(_complete_total(entries, 'protein_g'))}")
-            lines.extend(_food_line(entry) for entry in entries)
-
-    if view == "foods":
-        water_oz = totals.get("water_oz")
-        hydration = "not logged" if water_oz is None else f"{round(float(water_oz) * 29.5735):,.0f} mL ({float(water_oz):.1f} fl oz)"
-        lines.extend([
-            "",
-            "Daily totals",
-            f"Calories: {_kcal(totals.get('calories'))} | Protein: {_grams(totals.get('protein_g'))}",
-            f"Carbs: {_grams(totals.get('carbohydrates_g'))} | Fat: {_grams(totals.get('fat_g'))} | Fiber: {_grams(totals.get('fiber_g'))}",
-            f"Hydration: {hydration}",
-        ])
+        lines.extend(["", "Micronutrients"])
+        lines.extend(_markdown_table(["Nutrient", "Amount"], _micronutrient_rows(rows)))
 
     lines.extend([
         "",
         "Data quality",
         "Active entries only. Unknown means untracked, not zero.",
     ])
+    return "\n".join(lines)
+
+
+def render_daily_totals(ledger, date):
+    totals, rows = totals_for(ledger, date)
+    lines = [
+        f"Daily Totals | {date} | {timezone_name_for(ledger)}",
+        "",
+    ]
+    lines.extend(_markdown_table(["Metric", "Amount", "Target"], _daily_macro_rows(ledger, totals, rows, date)))
+    lines.extend(["", "Data quality", "Active entries only. Unknown means untracked, not zero."])
+    return "\n".join(lines)
+
+
+def _date_range(start_date, end_date):
+    start = dt.date.fromisoformat(start_date)
+    end = dt.date.fromisoformat(end_date)
+    if end < start:
+        raise ValueError("end date must be on or after start date")
+    current = start
+    while current <= end:
+        yield current.isoformat()
+        current += dt.timedelta(days=1)
+
+
+def totals_for_range(ledger, start_date, end_date):
+    rows = [e for e in ledger["entries"] if start_date <= e["date"] <= end_date and e.get("deleted_at") is None]
+    totals = {}
+    for field in nutrient_fields(ledger):
+        values = [e.get(field) for e in rows if e.get(field) is not None]
+        totals[field] = round(sum(values), 2) if values else None
+    totals["entry_count"] = len(rows)
+    return totals, rows
+
+
+def render_weekly_totals(ledger, start_date, end_date):
+    timezone = timezone_name_for(ledger)
+    totals, rows = totals_for_range(ledger, start_date, end_date)
+    daily_rows = []
+    for day in _date_range(start_date, end_date):
+        day_totals, day_entries = totals_for(ledger, day)
+        daily_rows.append([
+            day,
+            str(len(day_entries)),
+            _amount(day_totals.get("calories"), "calories"),
+            _amount(day_totals.get("protein_g"), "protein_g"),
+            _amount(day_totals.get("carbohydrates_g"), "carbohydrates_g"),
+            _amount(day_totals.get("fat_g"), "fat_g"),
+            _amount(day_totals.get("fiber_g"), "fiber_g"),
+            _amount(day_totals.get("water_oz"), "water_oz"),
+        ])
+    lines = [
+        f"Weekly Totals | {start_date} to {end_date} | {timezone}",
+        "",
+        "Daily Rows",
+    ]
+    lines.extend(_markdown_table(["Date", "Entries", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Hydration"], daily_rows))
+    lines.extend(["", "Weekly Totals"])
+    lines.extend(_markdown_table(["Metric", "Amount", "Target"], _daily_macro_rows(ledger, totals, rows, end_date)))
+    lines.extend(["", "Micronutrients"])
+    lines.extend(_markdown_table(["Nutrient", "Amount"], _micronutrient_rows(rows)))
+    lines.extend(["", "Data quality", "Active entries only. Unknown means untracked, not zero."])
     return "\n".join(lines)
 
 
@@ -660,6 +820,8 @@ def main():
     for name in ("today", "validate"):
         sub.add_parser(name)
     day = sub.add_parser("day"); day.add_argument("--date")
+    daily_totals = sub.add_parser("daily-totals"); daily_totals.add_argument("--date")
+    weekly_totals = sub.add_parser("weekly-totals"); weekly_totals.add_argument("--start-date", required=True); weekly_totals.add_argument("--end-date", required=True)
     panel = sub.add_parser("panel"); panel.add_argument("--date")
     foods = sub.add_parser("foods"); foods.add_argument("--date")
     rebuild_p = sub.add_parser("rebuild-state"); rebuild_p.add_argument("--date", required=True)
@@ -710,6 +872,11 @@ def main():
         report_date = current_local_date(ledger) if args.date in (None, "today") else args.date
         totals, rows = totals_for(ledger, report_date)
         print(json.dumps({"date": report_date, "timezone": timezone_name_for(ledger), "totals": totals, "confidence": confidence_for(ledger, rows), "entries": rows, "body_weight_lb": weight_for(ledger, report_date)}, indent=2)); return
+    if args.command == "daily-totals":
+        report_date = current_local_date(ledger) if args.date in (None, "today") else args.date
+        print(render_daily_totals(ledger, report_date)); return
+    if args.command == "weekly-totals":
+        print(render_weekly_totals(ledger, args.start_date, args.end_date)); return
     if args.command in ("panel", "foods"):
         report_date = current_local_date(ledger) if args.date in (None, "today") else args.date
         print(render_daily_report(ledger, report_date, view=args.command)); return

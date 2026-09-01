@@ -35,7 +35,32 @@ Use this skill when the user asks for a weekly review, weekly recap, seven-day s
 ## Output contract
 
 - State the exact window and timezone first.
-- Provide a compact daily table followed by weekly averages/totals, target comparisons, data-quality caveats, and findings.
+- Use the same Markdown table style as `nutrition-ledger` reports. Weekly nutrition totals must start with `Weekly Totals | <start-date> to <end-date> | <IANA timezone>`, then `Daily Rows`, then `Weekly Totals`, then `Micronutrients`.
+- Use this exact daily row table shape for nutrition data:
+
+```text
+Daily Rows
+| Date | Entries | Calories | Protein | Carbs | Fat | Fiber | Hydration |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+```
+
+- Use this exact weekly total table shape:
+
+```text
+Weekly Totals
+| Metric | Amount | Target |
+| --- | --- | --- |
+```
+
+- Use this exact micronutrient table shape:
+
+```text
+Micronutrients
+| Nutrient | Amount |
+| --- | --- |
+```
+
+- Do not use bullet lists for daily totals, weekly totals, panel rows, food lists, macros, or micronutrients unless the user explicitly asks for a one-off format.
 - Keep measured values separate from estimates and unknowns.
 - Explain whether each conclusion is supported, suggestive, or unavailable because of missing data.
 - A weekly review is read-only unless the user explicitly asks to log a correction or persist a target; never mutate the ledger merely by reviewing it.
