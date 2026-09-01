@@ -35,6 +35,19 @@ Read [the Library persistence contract](references/library-contract.md) before i
 - Report item-, calorie-, and confidence-weighted nutrient coverage and avoid adequacy claims when coverage is insufficient.
 - Validate before persistence and reconcile from canonical history before reporting.
 
+## Offline reference CLI shortcuts
+
+When operating in a Codex/developer environment with local ledger artifacts, use the streamlined reference CLI paths below instead of rediscovering schemas from tests or dumping raw masters:
+
+- Import archive setup: `nutrition_tracker.py --ledger Fitness_Ledger_Nutrition_Ledger.json setup-import --source-dir <package-dir>`. This promotes `IMPORT_Nutrition_Ledger.json` and `IMPORT_Nutrition_Current_State.json` to the canonical working filenames. Use `--force` only when the user explicitly wants to replace existing working copies.
+- Read-only reports: `--state` is optional for `day`, `panel`, `foods`, and `validate`; the script derives the sibling current-state filename from `--ledger`.
+- Raw entry schema: run `entry-template --meal <meal> --food-product <name>` to get the supported JSON payload for `add --fields`.
+- Food-master matching: run `food-master-find --query "<terms>" --summary` first. Use the full output only when provenance details are needed.
+- Portion scaling: prefer `add-from-master --amount-grams <g>` when the selected master has `serving_weight_g`; prefer `--servings <n>` for serving counts. Use `--factor` only when neither human-scale option fits.
+- Explicit dates for mutations still require `--date-source user_explicit`, even when the requested date is today.
+
+If these shortcuts do not cover a natural logging request, treat that as a skillset gap and add a tested CLI affordance rather than relying on ad hoc JSON construction.
+
 ## DATE PREFLIGHT — REQUIRED BEFORE EVERY DATE-SENSITIVE OPERATION
 
 Before any daily report, food log, hydration log, weight log, correction, deletion, fitness sync, or other date-sensitive operation:
