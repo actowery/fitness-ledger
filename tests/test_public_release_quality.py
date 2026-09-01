@@ -97,6 +97,21 @@ class PublicReleaseQualityTests(unittest.TestCase):
         self.assertIn("unknown`, never as zero", weekly)
         self.assertIn("2,000-kcal standard", weekly)
 
+    def test_timezone_runtime_contract_is_explicit_and_fails_closed(self) -> None:
+        nutrition = (ROOT / "skills" / "nutrition-ledger" / "SKILL.md").read_text(encoding="utf-8")
+        required = (
+            "DATE PREFLIGHT",
+            "configured IANA timezone",
+            "Never use the host/runtime date",
+            "If the timezone is missing or invalid, stop",
+            "setup suggestion only",
+            "explicit user confirmation and persistence",
+            "Show the resolved timezone and local date before mutation",
+            "read-back verification",
+        )
+        for phrase in required:
+            self.assertIn(phrase, nutrition)
+
     def test_library_persistence_contract_is_bundled_and_referenced(self) -> None:
         contract = ROOT / "skills" / "nutrition-ledger" / "references" / "library-contract.md"
         self.assertTrue(contract.is_file())
