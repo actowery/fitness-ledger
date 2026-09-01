@@ -104,7 +104,7 @@ class PublicReleaseQualityTests(unittest.TestCase):
             "configured IANA timezone",
             "Never use the host/runtime date",
             "If the timezone is missing or invalid, stop",
-            "show the resolved local date before mutation",
+            "Show the resolved timezone and local date before mutation",
             "read-back verification",
         )
         for phrase in required:
