@@ -33,6 +33,19 @@ class CanonFirstContractTests(unittest.TestCase):
         self.assertIn("A stale cache is a cache-repair event", text)
         self.assertIn("canonical history is the mandatory first read", text)
 
+    def test_installation_guard_preserves_existing_identity_and_history(self) -> None:
+        text = SKILL.read_text(encoding="utf-8")
+        required = (
+            "Installing or upgrading this public skill is not a data migration",
+            "preserve that path and identity",
+            "read-only continuity check",
+            "Never replay, import, or re-log existing history",
+            "Do not delete, rename, merge, or overwrite same-named non-canonical snapshots",
+            "do not create a duplicate entry",
+        )
+        for phrase in required:
+            self.assertIn(phrase, text)
+
 
 if __name__ == "__main__":
     unittest.main()
