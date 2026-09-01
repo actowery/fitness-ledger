@@ -1,6 +1,6 @@
 {
   "name": "fitness-ledger",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Library-native, provenance-aware nutrition and fitness tracking skills. Route any tracked food, nutrition, hydration, weight, workout, steps, activity, or fitness-data request through the relevant Fitness Ledger skill first.",
   "author": {
     "name": "Fitness Ledger Contributors",
