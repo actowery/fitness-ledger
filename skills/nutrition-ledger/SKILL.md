@@ -23,7 +23,7 @@ Use this skill when the user wants to log, correct, inspect, or summarize their 
 ## Core rules
 
 - Treat the JSON ledger as canonical; a daily state file is rebuildable cache.
-- Require a persisted IANA timezone (for example, `Europe/London`) before assigning dates. Offer a detected local timezone only as a setup suggestion; never infer it from the runtime clock or silently default to a region.
+- Require a persisted IANA timezone (for example, `Europe/London`) before assigning dates. A detected local timezone may be offered as a setup suggestion only; it requires explicit user confirmation and persistence before any date-sensitive operation. Never infer it from the runtime clock or silently default to a region.
 - Preserve corrections and deletions in the audit log. Do not silently overwrite history.
 - Track nutrient provenance per field: A label/direct, B authoritative reference, C reconstructed estimate, D unknown.
 - Track identity, portion, and composition confidence separately; never collapse them into an opaque score.
@@ -37,8 +37,8 @@ Use this skill when the user wants to log, correct, inspect, or summarize their 
 Before any daily report, food log, hydration log, weight log, correction, deletion, fitness sync, or other date-sensitive operation:
 
 1. Read the canonical ledger or initialization settings and resolve the user's configured IANA timezone.
-2. If the timezone is missing or invalid, stop and ask the user to configure it. Never infer a timezone from the host, device, runtime, conversation metadata, or IP address.
-3. Compute the current local date from the resolved timezone and the current instant. Never use the host/runtime date, UTC calendar date, or an unqualified date.today() result.
+2. If the timezone is missing or invalid, stop and ask the user to configure it. A detected timezone is a setup suggestion only and requires explicit user confirmation and persistence before proceeding. Never infer a timezone from the host, device, runtime, conversation metadata, or IP address.
+3. Compute the current local date from the resolved timezone and the current instant. Never use the host/runtime date, UTC calendar date, or an unqualified `date.today()` result.
 4. Show the resolved timezone and local date before mutation, for example: "Target ledger date: 2026-08-31 (America/New_York)."
 5. For explicit historical dates, preserve the user's explicit date and record that it was user-assigned; do not reinterpret it through the current timezone.
 6. Store the resolved timezone used for a new entry when the schema supports it. Changing a user's configured timezone must not rewrite historical entry dates.
