@@ -24,7 +24,7 @@ class NutritionReportingTests(unittest.TestCase):
                 "fat_g": "g", "fiber_g": "g", "water_oz": "fl oz",
             },
             "entries": [
-                {"entry_id": "3", "date": "2026-08-30", "meal_category": "snack", "food_product": "Kiwi", "amount_weight": "80 g", "calories": 49, "protein_g": 0.9, "carbohydrates_g": 12, "fat_g": 0.4, "fiber_g": 2.4, "water_oz": None, "vitamin_c_mg": 74, "deleted_at": None},
+                {"entry_id": "3", "date": "2026-08-30", "meal_category": "snack", "food_product": "Kiwi | gold", "amount_weight": "80 g\nweighed", "calories": 49, "protein_g": 0.9, "carbohydrates_g": 12, "fat_g": 0.4, "fiber_g": 2.4, "water_oz": None, "vitamin_c_mg": 74, "deleted_at": None},
                 {"entry_id": "1", "date": "2026-08-30", "meal_category": "breakfast", "food_product": "Eggs", "brand_restaurant_source": "Farm", "amount_weight": "2 large", "calories": 140, "protein_g": 12, "carbohydrates_g": 1, "fat_g": 10, "fiber_g": 0, "water_oz": None, "cholesterol_mg": 372, "deleted_at": None},
                 {"entry_id": "2", "date": "2026-08-30", "meal_category": "lunch", "food_product": "Mystery soup", "amount_weight": "1 bowl", "calories": 250, "protein_g": None, "carbohydrates_g": None, "fat_g": None, "fiber_g": None, "water_oz": None, "sodium_mg": 700, "deleted_at": None},
                 {"entry_id": "4", "date": "2026-08-30", "meal_category": "drink", "food_product": "Water", "amount_weight": "16 fl oz", "calories": 0, "protein_g": 0, "carbohydrates_g": 0, "fat_g": 0, "fiber_g": 0, "water_oz": 16, "deleted_at": None},
@@ -40,6 +40,9 @@ class NutritionReportingTests(unittest.TestCase):
         self.assertIn("| Metric | Amount | Target |", report)
         self.assertIn("| Food |", report)
         self.assertIn("Micronutrients\n| Nutrient | Amount |", report)
+        self.assertIn("| Cholesterol | 372.00 mg |", report)
+        self.assertIn("| Sodium | 700.00 mg |", report)
+        self.assertIn("| Vitamin C | 74.00 mg |", report)
         self.assertNotIn("protein credit", report.lower())
 
     def test_progress_uses_personal_targets_not_generic_daily_values(self):
@@ -96,6 +99,7 @@ class NutritionReportingTests(unittest.TestCase):
         self.assertLess(report.index("| Breakfast |"), report.index("| Lunch |"))
         self.assertLess(report.index("| Lunch |"), report.index("| Snacks |"))
         self.assertLess(report.index("| Snacks |"), report.index("| Drinks |"))
+        self.assertIn("| Snacks | Kiwi \\| gold | 80 g weighed | 49 kcal | 0.90 g | 12.00 g | 0.40 g | 2.40 g |", report)
 
     def test_empty_day_has_the_same_sections_and_never_invents_zero_foods(self):
         ledger = self.ledger()
@@ -155,6 +159,9 @@ class NutritionReportingTests(unittest.TestCase):
         self.assertIn("| 2026-08-31 | 1 | 100 kcal | 4.00 g | 18.00 g | 1.00 g | 2.00 g | unknown |", report)
         self.assertIn("Weekly Totals\n| Metric | Amount | Target |", report)
         self.assertIn("Micronutrients\n| Nutrient | Amount |", report)
+        self.assertIn("| Cholesterol | 372.00 mg |", report)
+        self.assertIn("| Sodium | 700.00 mg |", report)
+        self.assertIn("| Vitamin C | 74.00 mg |", report)
 
 
 if __name__ == "__main__":

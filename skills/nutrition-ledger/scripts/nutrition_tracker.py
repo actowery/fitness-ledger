@@ -140,12 +140,16 @@ def _target_progress(value, target, field):
 
 
 def _markdown_table(headers, rows):
+    def cell(value):
+        text = str(value)
+        return text.replace("\\", "\\\\").replace("|", "\\|").replace("\r", " ").replace("\n", " ")
+
     lines = [
-        "| " + " | ".join(headers) + " |",
+        "| " + " | ".join(cell(header) for header in headers) + " |",
         "| " + " | ".join("---" for _ in headers) + " |",
     ]
     for row in rows:
-        lines.append("| " + " | ".join(str(cell) for cell in row) + " |")
+        lines.append("| " + " | ".join(cell(value) for value in row) + " |")
     return lines
 
 
@@ -192,9 +196,10 @@ def _daily_macro_rows(ledger, totals, rows, date):
     targets = ledger.get("targets", {})
     water_oz = totals.get("water_oz")
     hydration = "unknown" if water_oz is None else f"{round(float(water_oz) * 29.5735):,.0f} mL ({float(water_oz):,.1f} fl oz)"
+    weight = weight_for(ledger, date)
     return [
         ["Entries", str(len(rows)), "active foods only"],
-        ["Weight", f"{float(weight_for(ledger, date)):,.1f} lb" if weight_for(ledger, date) is not None else "not logged", "body weight"],
+        ["Weight", f"{float(weight):,.1f} lb" if weight is not None else "not logged", "body weight"],
         ["Calories", _amount(totals.get("calories"), "calories"), _target_progress(totals.get("calories"), targets.get("daily_calories"), "calories")],
         ["Protein", _amount(totals.get("protein_g"), "protein_g"), _target_progress(totals.get("protein_g"), targets.get("daily_protein_g"), "protein_g")],
         ["Carbs", _amount(totals.get("carbohydrates_g"), "carbohydrates_g"), _target_progress(totals.get("carbohydrates_g"), targets.get("daily_carbohydrates_g"), "carbohydrates_g")],
@@ -204,14 +209,16 @@ def _daily_macro_rows(ledger, totals, rows, date):
     ]
 
 
-def _micronutrient_rows(totals):
+def _micronutrient_rows(rows):
     core = set(CORE_NUTRIENTS) | {"water_oz"}
-    rows = []
+    table_rows = []
     for field in DISPLAY_NUTRIENTS:
         if field in core:
             continue
-        rows.append([NUTRIENT_LABELS.get(field, field), _amount(totals.get(field), field)])
-    return rows
+        values = [entry.get(field) for entry in rows if entry.get(field) is not None]
+        total = round(sum(values), 2) if values else None
+        table_rows.append([NUTRIENT_LABELS.get(field, field), _amount(total, field)])
+    return table_rows
 
 
 def render_daily_report(ledger, date, view="panel"):
@@ -221,7 +228,6 @@ def render_daily_report(ledger, date, view="panel"):
     totals, rows = totals_for(ledger, date)
     timezone = timezone_name_for(ledger)
     heading = "Nutrition Panel" if view == "panel" else "Foods Eaten"
-    weight = weight_for(ledger, date)
     lines = [f"{heading} | {date} | {timezone}", ""]
     lines.append("Daily Totals")
     lines.extend(_markdown_table(["Metric", "Amount", "Target"], _daily_macro_rows(ledger, totals, rows, date)))
@@ -234,7 +240,7 @@ def render_daily_report(ledger, date, view="panel"):
 
     if view == "panel":
         lines.extend(["", "Micronutrients"])
-        lines.extend(_markdown_table(["Nutrient", "Amount"], _micronutrient_rows(totals)))
+        lines.extend(_markdown_table(["Nutrient", "Amount"], _micronutrient_rows(rows)))
 
     lines.extend([
         "",
@@ -301,7 +307,7 @@ def render_weekly_totals(ledger, start_date, end_date):
     lines.extend(["", "Weekly Totals"])
     lines.extend(_markdown_table(["Metric", "Amount", "Target"], _daily_macro_rows(ledger, totals, rows, end_date)))
     lines.extend(["", "Micronutrients"])
-    lines.extend(_markdown_table(["Nutrient", "Amount"], _micronutrient_rows(totals)))
+    lines.extend(_markdown_table(["Nutrient", "Amount"], _micronutrient_rows(rows)))
     lines.extend(["", "Data quality", "Active entries only. Unknown means untracked, not zero."])
     return "\n".join(lines)
 
