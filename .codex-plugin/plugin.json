@@ -1,6 +1,6 @@
 {
   "name": "fitness-ledger",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Library-native, provenance-aware nutrition and fitness tracking skills. Route any tracked food, nutrition, hydration, weight, workout, steps, activity, or fitness-data request through the relevant Fitness Ledger skill first.",
   "author": {
     "name": "Fitness Ledger Contributors",
@@ -14,7 +14,7 @@
   "interface": {
     "displayName": "Fitness Ledger",
     "shortDescription": "Track nutrition and fitness",
-    "longDescription": "Maintain a provenance-aware nutrition and fitness ledger in ChatGPT Library. For any user request involving tracked food, meals, nutrition, hydration, weight, workouts, exercises, steps, activity, body statistics, or fitness history, first inspect and invoke the relevant Fitness Ledger skill rather than answering from conversational memory, cached context, or an ad-hoc file lookup. Log food, hydration, and weight; correct entries without losing history; generate deterministic daily reports; and reconcile workout and activity snapshots without silently combining conflicting sources. Missing nutrient values remain unknown rather than becoming fabricated zeroes. Fitness Ledger is skills-only: it has no publisher-hosted service, telemetry, or required external account. It supports personal tracking and explanation, not medical diagnosis or treatment.",
+    "longDescription": "Maintain a provenance-aware nutrition and fitness ledger in ChatGPT Library. For any user request involving tracked food, meals, nutrition, hydration, weight, workouts, exercises, steps, activity, body statistics, or fitness history, first inspect and invoke the relevant Fitness Ledger skill rather than answering from conversational memory, cached context, or an ad-hoc file lookup. Log food, hydration, and weight using verified revisioned Library artifacts; correct entries without losing history; generate deterministic daily reports; and reconcile workout and activity snapshots without silently combining conflicting sources. Missing nutrient values remain unknown rather than becoming fabricated zeroes. Fitness Ledger is skills-only: it has no publisher-hosted service, telemetry, or required external account. It supports personal tracking and explanation, not medical diagnosis or treatment.",
     "developerName": "Fitness Ledger Contributors",
     "category": "Healthcare",
     "capabilities": [
