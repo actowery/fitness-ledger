@@ -2,10 +2,7 @@
 
 ## 1.0.1
 
-- Standardize food-log, foods-report, and daily-panel output with item metrics,
-  meal subtotals, daily totals, hydration, and persistence confirmation guidance.
-- Resolve `--date today` consistently for read-only day, panel, and foods reports.
-- Add regression coverage for the standardized output and date behavior.
+- Bump package and plugin metadata versions to 1.0.1.
 
 ## 0.4.0
 
