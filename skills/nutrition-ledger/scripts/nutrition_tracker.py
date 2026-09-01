@@ -50,15 +50,15 @@ NUTRIENT_LABELS = {
     "vitamin_d_mcg": "Vitamin D",
     "vitamin_e_mg": "Vitamin E",
     "vitamin_k_mcg": "Vitamin K",
-    "thiamin_mg": "Thiamin",
-    "riboflavin_mg": "Riboflavin",
-    "niacin_mg": "Niacin",
-    "pantothenic_acid_mg": "Pantothenic acid",
+    "thiamin_mg": "Vitamin B1 (Thiamin)",
+    "riboflavin_mg": "Vitamin B2 (Riboflavin)",
+    "niacin_mg": "Vitamin B3 (Niacin)",
+    "pantothenic_acid_mg": "Vitamin B5 (Pantothenic acid)",
     "vitamin_b6_mg": "Vitamin B6",
-    "biotin_mcg": "Biotin",
-    "folate_mcg_dfe": "Folate",
-    "folic_acid_mcg": "Folic acid",
-    "vitamin_b12_mcg": "Vitamin B12",
+    "biotin_mcg": "Vitamin B7 (Biotin)",
+    "folate_mcg_dfe": "Vitamin B9 (Folate)",
+    "folic_acid_mcg": "Folic acid (Vitamin B9)",
+    "vitamin_b12_mcg": "Vitamin B12 (Cobalamin)",
     "choline_mg": "Choline",
     "iodine_mcg": "Iodine",
     "chromium_mcg": "Chromium",
@@ -854,6 +854,7 @@ def main():
     add = sub.add_parser("add"); add.add_argument("--date"); add.add_argument("--date-source", choices=("inferred", "user_explicit"), default="inferred"); add.add_argument("--fields", required=True)
     correct = sub.add_parser("correct"); correct.add_argument("--entry-id", required=True); correct.add_argument("--fields", required=True)
     weight = sub.add_parser("weight"); weight.add_argument("--date"); weight.add_argument("--date-source", choices=("inferred", "user_explicit"), default="inferred"); weight.add_argument("--weight-lb", required=True, type=float); weight.add_argument("--notes", default="")
+    target = sub.add_parser("targets"); target.add_argument("--daily-calories", type=float); target.add_argument("--daily-protein-g", type=float); target.add_argument("--daily-carbohydrates-g", type=float); target.add_argument("--daily-fat-g", type=float); target.add_argument("--daily-fiber-g", type=float)
     delete = sub.add_parser("delete"); delete.add_argument("--entry-id", required=True)
     find_master = sub.add_parser("food-master-find"); find_master.add_argument("--query", required=True); find_master.add_argument("--summary", action="store_true"); find_master.add_argument("--limit", type=int, default=10)
     upsert_master = sub.add_parser("food-master-upsert"); upsert_master.add_argument("--record", required=True)
@@ -922,6 +923,35 @@ def main():
         state = rebuild(ledger, args.state, args.date)
         atomic_write(args.ledger, ledger)
         print(json.dumps(state, indent=2)); return
+
+    if args.command == "targets":
+        requested = {
+            "daily_calories": args.daily_calories,
+            "daily_protein_g": args.daily_protein_g,
+            "daily_carbohydrates_g": args.daily_carbohydrates_g,
+            "daily_fat_g": args.daily_fat_g,
+            "daily_fiber_g": args.daily_fiber_g,
+        }
+        if all(value is None for value in requested.values()):
+            raise SystemExit("at least one target value is required")
+        targets = ledger.setdefault("targets", {})
+        nutrient_targets = targets.setdefault("daily_nutrient_targets", {})
+        for key, value in requested.items():
+            if value is None:
+                continue
+            if value < 0:
+                raise SystemExit(f"target must be non-negative: {key}")
+            targets[key] = value
+            if key != "daily_calories":
+                nutrient_key = key.removeprefix("daily_")
+                nutrient_targets[nutrient_key] = value
+        mark_mutated(ledger)
+        errors = validate(ledger)
+        if errors:
+            raise SystemExit("; ".join(errors))
+        state = rebuild(ledger, args.state, current_local_date(ledger))
+        atomic_write(args.ledger, ledger)
+        print(json.dumps({"ok": True, "targets": targets, "state": state}, indent=2)); return
 
     if args.command in ("add", "add-from-master", "weight"):
         args.date = resolve_entry_date(ledger, args.date, args.date_source)
