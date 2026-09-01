@@ -20,6 +20,17 @@ Use this skill when the user wants to log, correct, inspect, or summarize their 
 - If a required Library file cannot be resolved, ask the user to select or upload it. Do not silently create an unrelated local ledger.
 - If the user already has an established ledger under a different filename, prefer the selected or resolved existing file and preserve its identity; ask before creating or renaming anything. Generic filenames are defaults for new setups, not a reason to duplicate existing history.
 
+## Installation and continuity guard
+
+Installing or upgrading this public skill is not a data migration. Before the first mobile log or report after installation:
+
+- Resolve the existing canonical ledger by its Library identity and established path. If the user's existing ledger is under `/Health/`, preserve that path and identity; do not create a new ledger because the installed skill starts a fresh conversation.
+- If exact-name search returns multiple files, inspect their Library paths and identities. Prefer the established canonical path returned by the user or prior setup; if the canonical target cannot be established, stop and ask the user to select one. Never choose by recency or filename alone.
+- Perform a read-only continuity check before initialization: confirm the canonical ledger is readable, its timezone is valid, and its history is present. Read the current-state cache only as a derived cross-check.
+- Never replay, import, or re-log existing history into a newly created file. Never initialize with `--force` during installation when an established ledger exists.
+- Treat the workbook and current-state file as projections/cache, not competing ledgers. Do not delete, rename, merge, or overwrite same-named non-canonical snapshots during installation.
+- If a mobile request may be a retry of a prior request, read the canonical ledger and use the existing entry identity/audit history before adding anything; do not create a duplicate entry merely because the earlier confirmation is not visible in the new conversation.
+
 ## Core rules
 
 - Treat the JSON ledger as canonical; a daily state file is rebuildable cache.
