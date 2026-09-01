@@ -82,7 +82,30 @@ Active entries only. Unknown means untracked, not zero.""")
         self.assertIn("Breakfast — 1 item | 140 kcal | P 12.0 g", report)
         self.assertIn("- Eggs (Farm), 2 large — 140 kcal | P 12.0 g | C 1.0 g | F 10.0 g | Fi 0.0 g", report)
         self.assertIn("Lunch — 1 item | 250 kcal | P unknown", report)
+        self.assertIn("Daily totals\nCalories: 439 kcal | Protein: 12.9 g", report)
+        self.assertIn("Carbs: 13.0 g | Fat: 10.4 g | Fiber: 2.4 g", report)
+        self.assertIn("Hydration: 473 mL (16.0 fl oz)", report)
         self.assertNotIn("Progress\n", report)
+
+    def test_cli_today_resolves_to_the_configured_local_date_for_read_only_reports(self):
+        with tempfile.TemporaryDirectory() as directory:
+            ledger_path = Path(directory) / "ledger.json"
+            state_path = Path(directory) / "state.json"
+            ledger = self.ledger()
+            ledger["entries"] = []
+            ledger_path.write_text(json.dumps(ledger), encoding="utf-8")
+            state_path.write_text("{}\n", encoding="utf-8")
+            expected_date = tracker.current_local_date(ledger)
+            for command, heading in (("day", '"date":'), ("panel", "Nutrition Panel"), ("foods", "Foods Eaten")):
+                result = subprocess.run(
+                    [sys.executable, str(SCRIPT), "--ledger", str(ledger_path), "--state", str(state_path), command, "--date", "today"],
+                    capture_output=True, text=True,
+                )
+                self.assertEqual(result.returncode, 0, result.stderr)
+                if command == "day":
+                    self.assertIn(f'"date": "{expected_date}"', result.stdout)
+                else:
+                    self.assertTrue(result.stdout.startswith(f"{heading} — {expected_date} (America/New_York)"))
 
     def test_foods_view_reuses_exact_meal_and_food_grammar(self):
         report = tracker.render_daily_report(self.ledger(), "2026-08-30", view="foods")
