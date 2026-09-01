@@ -72,7 +72,25 @@ The bundled script is an offline developer/test reference. The ChatGPT runtime m
 
 Use the canonical renderer contract encoded in the ledger and skill. When the offline reference implementation is available in a development environment, it may be used for validation.
 
-`panel` and `foods` have one stable report contract: header, active entry count, fixed meal order, consistent food lines, hydration, and explicit unknowns. Use plain protein totals; do not expose internal protein-credit fields.
+`panel` and `foods` have one stable report contract: header, active entry count, fixed meal order, consistent food lines, meal subtotals, daily totals, hydration, and explicit unknowns. Use plain protein totals; do not expose internal protein-credit fields.
+
+## Conversational output contract
+
+Apply this contract every time food or hydration is logged and every time a daily food report or panel is requested. Do not vary the structure based on how simple the entry seems.
+
+For a successful food or hydration log, show:
+
+1. The ledger date and configured timezone.
+2. Every newly added item with its amount, calories, protein, carbohydrates, fat, and fiber. Show `unknown` when a value is unavailable; never silently omit the nutrient.
+3. A subtotal for each affected meal or snack group.
+4. The updated daily totals for calories, protein, carbohydrates, fat, fiber, and water when water is tracked.
+5. Remaining amounts or overages against configured personal calorie, protein, and fiber targets when available.
+6. Any material estimate, assumption, or unresolved nutrient identity issue.
+7. A clear persistence/read-back confirmation after the canonical ledger write succeeds.
+
+For `foods`/“foods for the day”, show every active entry grouped by the fixed meal order, followed by each meal subtotal and the full-day totals. For `panel`/“today’s panel”, retain the progress and micronutrient sections, but also include the same individual entries, meal subtotals, and full-day totals. A summary-only response is allowed only when the user explicitly asks for one.
+
+The canonical renderer is the source of formatting for local or automated workflows. The conversational layer must preserve this same information when presenting a successful result; it must not replace the detailed confirmation with only the new daily total.
 
 Natural-language report routing is mandatory:
 
