@@ -44,11 +44,23 @@ Fitness Ledger is prepared as a skills-only public plugin. `PUBLIC_SUBMISSION.md
 
 ## Contributing workflow
 
-Create a topic branch, make a focused change with tests, and open a pull request into `main`. GitHub Actions runs the full test suite on every pull request and on pushes to `main`, across supported Python versions. Merge only after the checks are green and the change has been reviewed. Repository maintainers can additionally require the `CI` check in GitHub branch protection settings.
+Create a topic branch, make a focused change with tests, bump the semantic version, and open a pull request into `main`. GitHub Actions runs the full test suite on every pull request and on pushes to `main`, across supported Python versions. Pull-request CI also verifies that `.codex-plugin/plugin.json`, `pyproject.toml`, and `CHANGELOG.md` carry an increased semantic version compared with `main`. Merge only after the checks are green and the change has been reviewed. Repository maintainers can additionally require the `CI` check in GitHub branch protection settings.
 
 ## Releases
 
-GitHub is the release source of truth; this repository does not maintain a separate downloadable bundle. For a release, update the plugin version and changelog in a pull request, merge after CI passes, then create and push a matching tag such as `v0.1.0`. The release workflow reruns the test suite, verifies that the tag matches `.codex-plugin/plugin.json`, and creates a GitHub Release with generated notes and source archives.
+GitHub is the release source of truth; this repository does not maintain a separate downloadable bundle. For a release, update the plugin version and changelog in the pull request:
+
+```bash
+python3 scripts/release_workflow.py bump patch --message "Describe the user-visible change."
+```
+
+Use `minor` for new user-visible workflows or capabilities and `major` for breaking changes. After the PR merges, create and push the matching tag from `main`:
+
+```bash
+python3 scripts/release_workflow.py tag-release --push
+```
+
+The release workflow reruns the test suite, verifies that the tag matches `.codex-plugin/plugin.json`, and creates a GitHub Release with generated notes and source archives.
 
 ## Install and test locally
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.0 - 2026-09-01
+
+- Add enforced PR version and release workflow hooks.
+
 ## 1.1.0 - 2026-09-01
 
 - Replace the impossible skills-only assumption of in-place ChatGPT Library replacement with verified revisioned successor artifacts.
