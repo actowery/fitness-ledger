@@ -40,7 +40,8 @@ Read [the Library persistence contract](references/library-contract.md) before i
 When operating in a Codex/developer environment with local ledger artifacts, use the streamlined reference CLI paths below instead of rediscovering schemas from tests or dumping raw masters:
 
 - Import archive setup: `nutrition_tracker.py --ledger Fitness_Ledger_Nutrition_Ledger.json setup-import --source-dir <package-dir>`. This promotes `IMPORT_Nutrition_Ledger.json` and `IMPORT_Nutrition_Current_State.json` to the canonical working filenames. Use `--force` only when the user explicitly wants to replace existing working copies.
-- Read-only reports: `--state` is optional for `day`, `panel`, `foods`, and `validate`; the script derives the sibling current-state filename from `--ledger`.
+- Read-only reports: `--state` is optional for `day`, `daily-totals`, `weekly-totals`, `panel`, `foods`, and `validate`; the script derives the sibling current-state filename from `--ledger`.
+- Standard report commands: use `daily-totals --date <YYYY-MM-DD>`, `weekly-totals --start-date <YYYY-MM-DD> --end-date <YYYY-MM-DD>`, `foods --date <YYYY-MM-DD>`, and `panel --date <YYYY-MM-DD>`. Do not hand-format a different layout.
 - Raw entry schema: run `entry-template --meal <meal> --food-product <name>` to get the supported JSON payload for `add --fields`.
 - Food-master matching: run `food-master-find --query "<terms>" --summary` first. Use the full output only when provenance details are needed.
 - Portion scaling: prefer `add-from-master --amount-grams <g>` when the selected master has `serving_weight_g`; prefer `--servings <n>` for serving counts. Use `--factor` only when neither human-scale option fits.
@@ -91,35 +92,71 @@ Initialization may store a preferred daily combined synchronization time. Do not
 
 ## Daily reports
 
-`panel` and `foods` share one stable report contract: header, active entry count, fixed meal order, individual food lines, meal subtotals, daily totals, hydration, targets, and explicit unknowns. Use plain protein totals; do not expose internal protein-credit fields.
+All human-readable nutrition reports use one stable Markdown table contract. No conversational response should vary the style, section names, column order, units, or handling of unknowns unless the user explicitly asks for raw JSON or a one-off export format.
+
+Canonical report grammar:
+
+1. Header line: `<Report Name> | <YYYY-MM-DD or range> | <IANA timezone>`.
+2. Blank line.
+3. `Daily Totals`, `Weekly Totals`, or `Daily Rows` section label as applicable.
+4. Markdown tables only; no bullet lists for foods, macros, micros, daily totals, weekly totals, or panels.
+5. Final `Data quality` section with `Active entries only. Unknown means untracked, not zero.`
+
+Use these exact table shapes:
+
+```text
+Daily Totals
+| Metric | Amount | Target |
+| --- | --- | --- |
+| Entries | <count> | active foods only |
+| Weight | <lb or not logged> | body weight |
+| Calories | <amount> | <target progress or not set> |
+| Protein | <amount> | <target progress or not set> |
+| Carbs | <amount> | <target progress or not set> |
+| Fat | <amount> | <target progress or not set> |
+| Fiber | <amount> | <target progress or not set> |
+| Hydration | <mL and fl oz or unknown> | tracked drinking water |
+
+Foods
+| Meal | Food | Amount | Calories | Protein | Carbs | Fat | Fiber |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+
+Micronutrients
+| Nutrient | Amount |
+| --- | --- |
+```
+
+Weekly totals add this exact leading table before the weekly totals and micronutrient tables:
+
+```text
+Daily Rows
+| Date | Entries | Calories | Protein | Carbs | Fat | Fiber | Hydration |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+```
+
+`panel`, `foods`, `daily-totals`, and `weekly-totals` must share this contract: fixed header grammar, fixed table names, fixed column order, fixed meal order, explicit unknowns, and no internal protein-credit field. `panel` means full macros plus all tracked micronutrients.
 
 Natural-language routing:
 
 - `Show today's food`, `what did I eat today`, and equivalents → `foods`.
 - `Today's panel`, `today's numbers`, and equivalents → `panel`.
-- `Full nutrient panel` → `panel` plus the micronutrient section.
+- `Full nutrient panel` → `panel`.
+- `Daily totals` → `daily-totals`.
+- `Weekly totals` → `weekly-totals`.
 
 Before either report, resolve canonical history first and select active entries for the configured local date. If `Current_State` disagrees, canonical history wins and the cache is stale.
 
-For `foods`, show every active entry grouped by fixed meal order, then meal subtotals and full-day totals.
+For `foods`, show `Daily Totals` and the `Foods` table only.
 
-For `panel`, include the same individual entries and totals plus progress and micronutrients. The Progress section uses personal calorie/protein/fiber targets when configured; `%DV` belongs in the micronutrient section, not personal-target progress.
+For `panel`, show `Daily Totals`, `Foods`, and `Micronutrients`. The `Target` column uses personal calorie/protein/carbs/fat/fiber targets when configured; `%DV` belongs only in a future micronutrient reference column, not personal-target progress.
 
-For micronutrients, show amount plus %DV/reference for known values and `unknown` for missing fields.
+For micronutrients, show every tracked nutrient amount and `unknown` for missing fields. Do not omit a micronutrient just because it is unknown.
 
 ## Conversational output after a successful log
 
-Show:
+Show the same table contract as reports, then add only the persistence details needed for the mutation. A summary-only response is allowed only when the user explicitly asks for one.
 
-1. Ledger date and configured timezone.
-2. Every newly added item with amount, calories, protein, carbohydrates, fat, and fiber; use `unknown` when unavailable.
-3. A subtotal for each affected meal/snack group.
-4. Updated daily totals for calories, protein, carbohydrates, fat, fiber, and tracked drinking water.
-5. Remaining/overage versus configured calorie, protein, and fiber targets when available.
-6. Material estimates, assumptions, or unresolved identity issues.
-7. Explicit persistence/read-back confirmation including the verified ledger revision when available.
-
-A summary-only response is allowed only when the user explicitly asks for one.
+Always include explicit persistence/read-back confirmation including the verified ledger revision when available. Material estimates, assumptions, or unresolved identity issues go below the tables under `Data quality`.
 
 ## Safety boundary
 
