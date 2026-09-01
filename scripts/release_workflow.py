@@ -146,6 +146,11 @@ def ensure_release(tag: str) -> None:
         subprocess.run(["gh", "release", "create", tag, "--verify-tag", "--generate-notes"], cwd=ROOT, check=True)
 
 
+def validate_tag_release_options(push: bool, create_release: bool) -> None:
+    if create_release and not push:
+        raise ValueError("--create-release requires --push so the verified tag exists on GitHub")
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     sub = parser.add_subparsers(dest="command", required=True)
@@ -166,6 +171,7 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "bump":
             print(apply_bump(args.kind, args.message))
         elif args.command == "tag-release":
+            validate_tag_release_options(args.push, args.create_release)
             version = args.version or ensure_versions_match()
             created = create_tag(version, args.push)
             if args.create_release:

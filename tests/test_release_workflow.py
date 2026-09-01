@@ -53,6 +53,12 @@ class ReleaseWorkflowTests(unittest.TestCase):
         self.assertIn("gh\", \"release\", \"create\"", text)
         self.assertIn("v{version}", text)
 
+    def test_create_release_requires_pushing_the_tag(self) -> None:
+        with self.assertRaisesRegex(ValueError, "--create-release requires --push"):
+            release_workflow.validate_tag_release_options(push=False, create_release=True)
+
+        release_workflow.validate_tag_release_options(push=True, create_release=True)
+
 
 if __name__ == "__main__":
     unittest.main()

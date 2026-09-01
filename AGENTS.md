@@ -7,7 +7,7 @@ For every pull request:
 1. Apply a semantic version bump before opening the PR:
 
    ```bash
-   python scripts/release_workflow.py bump patch --message "Describe the user-visible change."
+   python3 scripts/release_workflow.py bump patch --message "Describe the user-visible change."
    ```
 
    Use `minor` for new user-visible workflows or capabilities and `major` for breaking changes.
@@ -15,7 +15,7 @@ For every pull request:
 2. Run the full test suite:
 
    ```bash
-   python -m unittest discover -s tests
+   python3 -m unittest discover -s tests
    ```
 
 3. Open the PR and wait for CI plus Copilot review.
@@ -24,7 +24,7 @@ For every pull request:
 6. After merge, update local `main`, create the matching release tag, and push it:
 
    ```bash
-   python scripts/release_workflow.py tag-release --push
+   python3 scripts/release_workflow.py tag-release --push
    ```
 
 7. Confirm the release workflow creates the GitHub Release for the tag.
