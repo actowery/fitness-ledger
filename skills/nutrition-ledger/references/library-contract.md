@@ -36,7 +36,7 @@ Legacy/import ledgers without this metadata are revision `0`. The helper in `scr
 ## Read path
 
 1. Search Library for the user's selected logical ledger name and any recognized successor artifacts.
-2. Read candidate ledger contents before selecting canon; snippets alone are insufficient. Canonical history is the mandatory first read.
+2. Read candidate ledger contents before selecting canon; snippets alone are insufficient; canonical history is the mandatory first read.
 3. Select the unique artifact with the highest valid revision using `library_revision.select_canonical` semantics.
 4. If two different artifacts claim the same highest revision, stop and report a conflict. Never guess based on timestamp or filename.
 5. Only after canonical history has been resolved may the current-state cache be read as a derived cross-check.
