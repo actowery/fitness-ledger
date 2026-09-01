@@ -189,7 +189,7 @@ def current_local_date(ledger, now=None):
 
 def validate_date_argument_policy(requested_date=None, date_source="inferred"):
     """Fail closed when a caller supplies a date without declaring its provenance."""
-    if requested_date is not None and date_source == "inferred":
+    if requested_date is not None and date_source != "user_explicit":
         raise ValueError(
             "an explicit date requires date_source=user_explicit; "
             "omit the date to derive it from the persisted IANA timezone"
@@ -356,7 +356,7 @@ def rebuild(ledger, state_path, date):
         "body_weight_lb": weight_for(ledger, date),
         "entries": [{k: e.get(k) for k in ("entry_id", "meal_category", "food_product", "amount_weight", "calories", "protein_g")} for e in rows],
         "pending_excel_sync": ledger["sync"].get("pending_excel_sync", True),
-        "canonical_ledger_filename": "nutrition_ledger.json",
+        "canonical_ledger_filename": "Fitness_Ledger_Nutrition_Ledger.json",
         "ledger_fingerprint": ledger_fingerprint(ledger, date),
     }
     ledger.setdefault("daily_cache", {})[date] = {**totals, "body_weight_lb": state["body_weight_lb"], "calorie_progress": state["progress"]["calories"], "protein_progress": state["progress"]["protein"], "nutrient_confidence": confidence}
@@ -548,9 +548,9 @@ def main():
     init.add_argument("--force", action="store_true")
     for name in ("today", "validate"):
         sub.add_parser(name)
-    day = sub.add_parser("day"); day.add_argument("--date", required=True)
-    panel = sub.add_parser("panel"); panel.add_argument("--date", required=True)
-    foods = sub.add_parser("foods"); foods.add_argument("--date", required=True)
+    day = sub.add_parser("day"); day.add_argument("--date")
+    panel = sub.add_parser("panel"); panel.add_argument("--date")
+    foods = sub.add_parser("foods"); foods.add_argument("--date")
     rebuild_p = sub.add_parser("rebuild-state"); rebuild_p.add_argument("--date", required=True)
     add = sub.add_parser("add"); add.add_argument("--date"); add.add_argument("--date-source", choices=("inferred", "user_explicit"), default="inferred"); add.add_argument("--fields", required=True)
     correct = sub.add_parser("correct"); correct.add_argument("--entry-id", required=True); correct.add_argument("--fields", required=True)
@@ -592,10 +592,12 @@ def main():
         print(json.dumps({"valid": not errors, "errors": errors}, indent=2))
         raise SystemExit(1 if errors else 0)
     if args.command == "day":
-        totals, rows = totals_for(ledger, args.date)
-        print(json.dumps({"date": args.date, "totals": totals, "confidence": confidence_for(ledger, rows), "entries": rows, "body_weight_lb": weight_for(ledger, args.date)}, indent=2)); return
+        report_date = args.date or current_local_date(ledger)
+        totals, rows = totals_for(ledger, report_date)
+        print(json.dumps({"date": report_date, "timezone": timezone_name_for(ledger), "totals": totals, "confidence": confidence_for(ledger, rows), "entries": rows, "body_weight_lb": weight_for(ledger, report_date)}, indent=2)); return
     if args.command in ("panel", "foods"):
-        print(render_daily_report(ledger, args.date, view=args.command)); return
+        report_date = args.date or current_local_date(ledger)
+        print(render_daily_report(ledger, report_date, view=args.command)); return
     if args.command == "food-master-find":
         terms = set(re.sub(r"[^a-z0-9]+", " ", args.query.lower()).split())
         matches = []
@@ -644,14 +646,13 @@ def main():
     elif args.command == "food-master-upsert":
         record = parse_fields(args.record)
         upsert_food_master(ledger, record)
-        affected_date = max((e["date"] for e in ledger.get("entries", [])), default=dt.date.today().isoformat())
+        affected_date = max((e["date"] for e in ledger.get("entries", [])), default=current_local_date(ledger))
     elif args.command == "correct":
         fields = parse_fields(args.fields)
         entry = correct_entry(ledger, args.entry_id, fields, stamp); affected_date = entry["date"]
         if ledger.get("schema_version", "1").startswith("2"):
             refreshed = ensure_v2_entry(ledger, dict(entry), stamp)
             entry.clear(); entry.update(refreshed)
-        entry["revision"] = entry.get("revision", 1) + 1; entry["updated_at"] = stamp
     elif args.command == "weight":
         affected_date = args.date
         row = {"weight_id": next_id(ledger.get("weights", []), args.date, "W-"), "date": args.date, "date_source": args.date_source, "weight_lb": args.weight_lb, "notes": args.notes, "deleted_at": None, "revision": 1, "created_at": stamp, "updated_at": stamp}
