@@ -32,6 +32,20 @@ Use this skill when the user wants to log, correct, inspect, or summarize their 
 - Use package labels before generic databases for branded food. Scale known nutrients for weighed portions.
 - Before reporting, reconcile from the ledger and validate it. Never report from a stale cache alone.
 
+## DATE PREFLIGHT — REQUIRED BEFORE EVERY DATE-SENSITIVE OPERATION
+
+Before any daily report, food log, hydration log, weight log, correction, deletion, fitness sync, or other date-sensitive operation:
+
+1. Read the canonical ledger or initialization settings and resolve the user's configured IANA timezone.
+2. If the timezone is missing or invalid, stop and ask the user to configure it. Never infer a timezone from the host, device, runtime, conversation metadata, or IP address.
+3. Compute the current local date from the resolved timezone and the current instant. Never use the host/runtime date, UTC calendar date, or an unqualified date.today() result.
+4. Show the resolved timezone and local date before mutation, for example: "Target ledger date: 2026-08-31 (America/New_York)."
+5. For explicit historical dates, preserve the user's explicit date and record that it was user-assigned; do not reinterpret it through the current timezone.
+6. Store the resolved timezone used for a new entry when the schema supports it. Changing a user's configured timezone must not rewrite historical entry dates.
+7. Treat this preflight as a blocking guard, not explanatory guidance. Do not proceed on a failed or skipped preflight.
+
+A successful write still requires canonical read-back verification. If the write or read-back cannot be completed, report "not persisted" and do not claim success.
+
 ## Product identity and versioning
 
 Food masters may carry GTIN/UPC, brand/manufacturer, product name, variant,
