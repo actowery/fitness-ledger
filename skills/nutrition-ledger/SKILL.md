@@ -5,13 +5,15 @@ description: Log food, hydration, and body weight into an auditable ChatGPT Libr
 
 # Nutrition Ledger
 
-Use this skill for logging, correcting, inspecting, or summarizing nutrition data. Keep the conversation natural, but persist successful mutations to the user's ChatGPT Library. Never substitute conversational memory or a stale cache for canonical history.
+Use this skill for logging, correcting, inspecting, or summarizing nutrition data. Keep the conversation natural, but persist successful mutations to the user's ChatGPT Library. Never substitute conversational memory or a stale cache for canonical history. The runtime must never require a local filesystem path, a local process, or manual spreadsheet maintenance for ordinary ChatGPT logging.
 
 ## Library-native persistence
 
 - Search Library for the user's selected logical ledger before every report or mutation.
-- Read candidate canonical ledger contents before using `Current_State`; search snippets alone are not authoritative.
-- **Canon-first is mandatory.** `Fitness_Ledger_Nutrition_Current_State.json` is a rebuildable cache and may only be used after canonical history has been resolved.
+- **Canon-first is mandatory:** resolve and read the canonical ledger before reading `Fitness_Ledger_Nutrition_Current_State.json`.
+- Read candidate canonical ledger contents before using `Current_State`; search snippets alone are not authoritative. `Current_State` is never the primary read source.
+- If canonical entries and current state disagree, canonical active entries win. Include the canonical item in the report and mark/rebuild the state as stale.
+- Never answer “show today’s foods” or equivalent from current state alone.
 - A skills-only plugin does not itself provide an in-place Library replacement action. Do **not** claim that such an action exists merely because this skill describes persistence.
 - Portable ChatGPT persistence uses a **revisioned successor artifact**: validate the proposed full JSON ledger, stamp the next `_fitness_ledger_revision`, create that complete file through the runtime's file-generation capability so ChatGPT saves it to Library, then read/search Library again and verify the revision/fingerprint before claiming success.
 - Legacy/import ledgers without `_fitness_ledger_revision` are revision `0`. Existing names such as `IMPORT_Nutrition_Ledger.json` remain valid canonical roots.
@@ -19,7 +21,7 @@ Use this skill for logging, correcting, inspecting, or summarizing nutrition dat
 - If the active runtime actually exposes a guarded Library replace/write action, it may be used instead, but only after the capability is observed and the successful write is verified by canonical read-back.
 - Never ask a mobile user to run a local command or manually maintain a spreadsheet just to log food.
 
-Read [the Library persistence contract](references/library-contract.md) before implementing or changing read, mutation, cache, or conflict behavior. `scripts/library_revision.py` is the deterministic reference implementation for revision fingerprinting and canonical selection.
+Read [the Library persistence contract](references/library-contract.md) before implementing or changing read, mutation, cache, or conflict behavior. `scripts/library_revision.py` is the offline developer/test reference implementation for revision fingerprinting and canonical selection.
 
 ## Core rules
 
@@ -33,19 +35,19 @@ Read [the Library persistence contract](references/library-contract.md) before i
 - Report item-, calorie-, and confidence-weighted nutrient coverage and avoid adequacy claims when coverage is insufficient.
 - Validate before persistence and reconcile from canonical history before reporting.
 
-## Date preflight — required before date-sensitive operations
+## DATE PREFLIGHT — REQUIRED BEFORE EVERY DATE-SENSITIVE OPERATION
 
 Before any daily report, food log, hydration log, weight log, correction, deletion, fitness sync, or other date-sensitive operation:
 
-1. Read the canonical ledger or initialization settings and resolve the persisted IANA timezone.
-2. If timezone is missing or invalid, stop and ask the user to configure it. Never silently infer it from the runtime clock, device, IP, or conversation metadata.
-3. Compute the current ledger date from the configured timezone and current instant.
-4. Show the target date and timezone before mutation, for example: `Target ledger date: 2026-09-01 (America/New_York).`
+1. Read the canonical ledger or initialization settings and resolve the configured IANA timezone.
+2. If the timezone is missing or invalid, stop and ask the user to configure it. A detected timezone is a setup suggestion only and requires explicit user confirmation and persistence before proceeding.
+3. Compute the current local date from the configured timezone and current instant. Never use the host/runtime date, UTC calendar date, or an unqualified local host date.
+4. Show the resolved timezone and local date before mutation, for example: `Target ledger date: 2026-09-01 (America/New_York).`
 5. Preserve explicit historical dates as user-assigned dates.
 6. Store the timezone used for new entries when schema supports it.
 7. Treat failed preflight as blocking.
 
-A successful mutation still requires Library read-back verification. If persistence or read-back cannot be completed, say `not persisted` and do not claim success.
+A successful mutation still requires canonical read-back verification. If persistence or read-back verification cannot be completed, say `not persisted` and do not claim success.
 
 ## Mutation transaction
 
