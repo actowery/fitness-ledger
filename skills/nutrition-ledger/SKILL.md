@@ -12,7 +12,7 @@ Use this skill for logging, correcting, inspecting, or summarizing nutrition dat
 - Search Library for the user's selected logical ledger before every report or mutation.
 - **Canon-first is mandatory:** resolve and read the canonical ledger before reading `Fitness_Ledger_Nutrition_Current_State.json`.
 - Read candidate canonical ledger contents before using `Current_State`; search snippets alone are not authoritative. `Current_State` is never the primary read source.
-- If canonical entries and current state disagree, canonical active entries win. Include the canonical item in the report and mark/rebuild the state as stale.
+- If canonical entries and current state disagree, canonical active entries win; include the canonical item in the report and mark/rebuild the state as stale.
 - Never answer “show today’s foods” or equivalent from current state alone.
 - A skills-only plugin does not itself provide an in-place Library replacement action. Do **not** claim that such an action exists merely because this skill describes persistence.
 - Portable ChatGPT persistence uses a **revisioned successor artifact**: validate the proposed full JSON ledger, stamp the next `_fitness_ledger_revision`, create that complete file through the runtime's file-generation capability so ChatGPT saves it to Library, then read/search Library again and verify the revision/fingerprint before claiming success.
