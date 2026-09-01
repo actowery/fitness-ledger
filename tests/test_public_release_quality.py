@@ -165,13 +165,28 @@ class PublicReleaseQualityTests(unittest.TestCase):
         self.assertIn("push:", workflow)
         self.assertIn("python3 -m unittest discover -v -s tests", workflow)
         self.assertIn("python3 -m json.tool .codex-plugin/plugin.json", workflow)
+        self.assertIn("fetch-depth: 0", workflow)
+        self.assertIn("Validate PR semantic version bump", workflow)
+        self.assertIn("scripts/release_workflow.py check-pr-version", workflow)
 
     def test_release_workflow_requires_a_versioned_tag_and_creates_a_github_release(self) -> None:
         workflow = RELEASE_WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("tags: ['v*']", workflow)
         self.assertIn("python3 -m unittest discover -v -s tests", workflow)
         self.assertIn("Validate tag matches plugin version", workflow)
+        self.assertIn("release_workflow.ensure_versions_match", workflow)
         self.assertIn("gh release create", workflow)
+
+    def test_agent_workflow_requires_pr_version_review_and_release_steps(self) -> None:
+        instructions = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
+        for required in (
+            "semantic version bump before opening the PR",
+            "wait for CI plus Copilot review",
+            "request another review",
+            "tag-release --push",
+            "Confirm the release workflow creates the GitHub Release",
+        ):
+            self.assertIn(required, instructions)
 
     def test_bundle_has_no_personal_paths_or_identifiers(self) -> None:
         for path in release_scanned_files():

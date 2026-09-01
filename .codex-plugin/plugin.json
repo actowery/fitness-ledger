@@ -1,6 +1,6 @@
 {
   "name": "fitness-ledger",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Library-native, provenance-aware nutrition and fitness tracking skills. Route any tracked food, nutrition, hydration, weight, workout, steps, activity, or fitness-data request through the relevant Fitness Ledger skill first.",
   "author": {
     "name": "Fitness Ledger Contributors",
@@ -9,7 +9,13 @@
   "homepage": "https://github.com/actowery/fitness-ledger",
   "repository": "https://github.com/actowery/fitness-ledger",
   "license": "MIT",
-  "keywords": ["nutrition", "fitness", "health", "tracking", "provenance"],
+  "keywords": [
+    "nutrition",
+    "fitness",
+    "health",
+    "tracking",
+    "provenance"
+  ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Fitness Ledger",
