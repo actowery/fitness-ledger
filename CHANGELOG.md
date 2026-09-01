@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.2
+
+- Bump package and plugin metadata versions to 1.0.2.
+
 ## 1.0.1
 
 - Bump package and plugin metadata versions to 1.0.1.
