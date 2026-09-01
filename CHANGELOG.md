@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.1 - 2026-09-01
+
+- Add DRV percentages to standardized nutrition panels.
+
 ## 1.2.0 - 2026-09-01
 
 - Add enforced PR version and release workflow hooks.
