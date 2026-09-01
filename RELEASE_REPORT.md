@@ -1,9 +1,9 @@
-# Nutrition Tracking System Upgrade — Release Report (0.4.0)
+# Nutrition Tracking System Upgrade — Release Report (1.0.1)
 
 ## Baseline
 
 - Repository: `actowery/fitness-ledger`
-- Release: `0.4.0`
+- Release: `1.0.1`
 - Baseline test result: 68 passed, 0 failed
 - Canonical personal artifacts: Library-backed ledger JSON, current-state cache, and workbook; not present in this public repository
 - Repository artifacts: Library-native skills, offline tracker, fitness reconciliation helpers, schemas, fixtures, and regression tests
