@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.3 - 2026-09-01
+
+- Enforce verbatim nutrition report rendering.
+
 ## 1.2.2 - 2026-09-01
 
 - Clarify DRV % precedence rule in skill contract

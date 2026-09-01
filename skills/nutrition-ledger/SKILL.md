@@ -92,7 +92,7 @@ Initialization may store a preferred daily combined synchronization time. Do not
 
 ## Daily reports
 
-All human-readable nutrition reports use one stable Markdown table contract. No conversational response should vary the style, section names, column order, units, or handling of unknowns unless the user explicitly asks for raw JSON or a one-off export format. For `panel`, `foods`, `daily-totals`, and `weekly-totals`, relay the rendered report in full; do not compress it into prose, a code-block summary, partial highlights, or "key foods" unless the user explicitly asks for a summary.
+All human-readable nutrition reports use one stable Markdown table contract. No conversational response should vary the style, section names, column order, units, or handling of unknowns unless the user explicitly asks for raw JSON or a one-off export format. For `panel`, `foods`, `daily-totals`, and `weekly-totals`, relay the renderer output verbatim and in full. This is a hard output invariant: never collapse any report into prose, a code-block summary, partial highlights, selected nutrients, or "key foods"; never paraphrase or truncate the tables. Only produce a summary when the user explicitly asks for a summary instead of the report.
 
 Canonical report grammar:
 
@@ -154,9 +154,9 @@ For micronutrients, show every tracked nutrient amount, DRV context, and `unknow
 
 ## Conversational output after a successful log
 
-Show the same table contract as reports, then add only the persistence details needed for the mutation. A summary-only response is allowed only when the user explicitly asks for one.
+Keep simple mutations concise. For a food, hydration, or weight log, show the confirmed mutation and the updated `Daily Totals` table only; do not print the full foods and micronutrients tables unless the user asks for a panel or report. When a panel or report is requested, the hard verbatim-report invariant above overrides concise-output preferences. Include explicit persistence/read-back confirmation including the verified ledger revision when available. Material estimates, assumptions, or unresolved identity issues may be included briefly under `Data quality`.
 
-Always include explicit persistence/read-back confirmation including the verified ledger revision when available. Material estimates, assumptions, or unresolved identity issues go below the tables under `Data quality`.
+Corrections, deletions, target changes, and other mutations should use the same concise confirmation pattern unless the user requests a full report.
 
 ## Safety boundary
 
