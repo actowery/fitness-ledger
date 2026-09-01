@@ -2,6 +2,7 @@
 
 import json
 import re
+import subprocess
 import unittest
 from pathlib import Path
 
@@ -17,6 +18,31 @@ FORBIDDEN_MARKERS = (
     "libfile_",
     "tracker_files",
 )
+
+
+def release_scanned_files():
+    try:
+        result = subprocess.run(
+            ["git", "ls-files"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        ignored = {".git", "__pycache__"}
+        return [
+            path
+            for path in ROOT.rglob("*")
+            if path.is_file()
+            and not ignored.intersection(path.parts)
+            and path != Path(__file__)
+        ]
+    return [
+        ROOT / line
+        for line in result.stdout.splitlines()
+        if line and ROOT / line != Path(__file__)
+    ]
 
 
 class PublicReleaseQualityTests(unittest.TestCase):
@@ -148,14 +174,7 @@ class PublicReleaseQualityTests(unittest.TestCase):
         self.assertIn("gh release create", workflow)
 
     def test_bundle_has_no_personal_paths_or_identifiers(self) -> None:
-        ignored = {".git", "__pycache__"}
-        for path in ROOT.rglob("*"):
-            if (
-                not path.is_file()
-                or ignored.intersection(path.parts)
-                or path == Path(__file__)
-            ):
-                continue
+        for path in release_scanned_files():
             text = path.read_text(encoding="utf-8", errors="ignore")
             for marker in FORBIDDEN_MARKERS:
                 self.assertNotIn(marker, text, f"{marker!r} leaked into {path.relative_to(ROOT)}")

@@ -5,6 +5,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import tempfile
 from pathlib import Path
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
@@ -484,6 +485,102 @@ def parse_fields(raw):
     return data
 
 
+def default_state_path(ledger_path):
+    path = Path(ledger_path)
+    if path.name == "Fitness_Ledger_Nutrition_Ledger.json":
+        return path.with_name("Fitness_Ledger_Nutrition_Current_State.json")
+    if path.name == "IMPORT_Nutrition_Ledger.json":
+        return path.with_name("IMPORT_Nutrition_Current_State.json")
+    return path.with_name(path.stem + "_Current_State.json")
+
+
+def setup_import(source_dir, ledger_path, state_path, force=False):
+    source = Path(source_dir)
+    source_ledger = source / "IMPORT_Nutrition_Ledger.json"
+    source_state = source / "IMPORT_Nutrition_Current_State.json"
+    if not source_ledger.exists():
+        raise FileNotFoundError(f"missing import ledger: {source_ledger}")
+    if not source_state.exists():
+        raise FileNotFoundError(f"missing import state: {source_state}")
+    destination_ledger = Path(ledger_path)
+    destination_state = Path(state_path)
+    if not force:
+        existing = [str(path) for path in (destination_ledger, destination_state) if path.exists()]
+        if existing:
+            raise FileExistsError("canonical destination exists; use --force to replace: " + ", ".join(existing))
+    destination_ledger.parent.mkdir(parents=True, exist_ok=True)
+    destination_state.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(source_ledger, destination_ledger)
+    shutil.copyfile(source_state, destination_state)
+    ledger = load(destination_ledger)
+    state = load(destination_state)
+    return {
+        "ok": True,
+        "ledger": str(destination_ledger),
+        "state": str(destination_state),
+        "timezone": timezone_name_for(ledger),
+        "entry_count": len(ledger.get("entries", [])),
+        "state_current_date": state.get("current_date"),
+    }
+
+
+def entry_template(ledger, meal_category="snack", food_product=""):
+    fields = {
+        "meal_category": meal_category,
+        "food_product": food_product or "food name",
+        "brand_restaurant_source": "",
+        "amount_weight": "amount",
+        "source_id": "",
+        "accuracy": "estimate",
+        "is_estimate": True,
+        "confidence_tier": "C",
+        "notes": "",
+    }
+    for nutrient in nutrient_fields(ledger):
+        fields[nutrient] = None
+    fields.update({
+        "calories": 0,
+        "protein_g": 0,
+        "protein_credit_g": 0,
+        "carbohydrates_g": 0,
+        "fat_g": 0,
+        "fiber_g": 0,
+    })
+    return fields
+
+
+def summarize_food_master(master):
+    nutrients = master.get("nutrients", {})
+    return {
+        "food_master_id": master.get("food_master_id"),
+        "food_name": master.get("food_name"),
+        "brand": master.get("brand"),
+        "serving_description": master.get("serving_description"),
+        "serving_weight_g": master.get("serving_weight_g"),
+        "calories": nutrients.get("calories"),
+        "protein_g": nutrients.get("protein_g"),
+        "carbohydrates_g": nutrients.get("carbohydrates_g"),
+        "fat_g": nutrients.get("fat_g"),
+        "fiber_g": nutrients.get("fiber_g"),
+        "source_type": master.get("source_type"),
+        "source_url_or_id": master.get("source_url_or_id"),
+    }
+
+
+def master_factor(args, master):
+    provided = [args.factor is not None, args.servings is not None, args.amount_grams is not None]
+    if sum(1 for value in provided if value) > 1:
+        raise ValueError("use only one of --factor, --servings, or --amount-grams")
+    if args.amount_grams is not None:
+        serving_weight = master.get("serving_weight_g")
+        if not serving_weight:
+            raise ValueError("--amount-grams requires a food master with serving_weight_g")
+        return args.amount_grams / float(serving_weight)
+    if args.servings is not None:
+        return args.servings
+    return args.factor if args.factor is not None else 1.0
+
+
 def infer_tier(fields):
     explicit = fields.pop("confidence_tier", None)
     if explicit in ("A", "B", "C", "D"):
@@ -545,7 +642,7 @@ def ensure_v2_entry(ledger, fields, stamp):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--ledger", required=True)
-    p.add_argument("--state", required=True)
+    p.add_argument("--state")
     sub = p.add_subparsers(dest="command", required=True)
     init = sub.add_parser("init")
     init.add_argument("--timezone", required=True)
@@ -557,20 +654,27 @@ def main():
     init.add_argument("--daily-fiber-g", type=float)
     init.add_argument("--source", action="append", choices=("apple-health", "caliber"), default=[])
     init.add_argument("--force", action="store_true")
+    setup = sub.add_parser("setup-import")
+    setup.add_argument("--source-dir", required=True)
+    setup.add_argument("--force", action="store_true")
     for name in ("today", "validate"):
         sub.add_parser(name)
     day = sub.add_parser("day"); day.add_argument("--date")
     panel = sub.add_parser("panel"); panel.add_argument("--date")
     foods = sub.add_parser("foods"); foods.add_argument("--date")
     rebuild_p = sub.add_parser("rebuild-state"); rebuild_p.add_argument("--date", required=True)
+    template = sub.add_parser("entry-template"); template.add_argument("--meal", default="snack"); template.add_argument("--food-product", default="")
     add = sub.add_parser("add"); add.add_argument("--date"); add.add_argument("--date-source", choices=("inferred", "user_explicit"), default="inferred"); add.add_argument("--fields", required=True)
     correct = sub.add_parser("correct"); correct.add_argument("--entry-id", required=True); correct.add_argument("--fields", required=True)
     weight = sub.add_parser("weight"); weight.add_argument("--date"); weight.add_argument("--date-source", choices=("inferred", "user_explicit"), default="inferred"); weight.add_argument("--weight-lb", required=True, type=float); weight.add_argument("--notes", default="")
     delete = sub.add_parser("delete"); delete.add_argument("--entry-id", required=True)
-    find_master = sub.add_parser("food-master-find"); find_master.add_argument("--query", required=True)
+    find_master = sub.add_parser("food-master-find"); find_master.add_argument("--query", required=True); find_master.add_argument("--summary", action="store_true"); find_master.add_argument("--limit", type=int, default=10)
     upsert_master = sub.add_parser("food-master-upsert"); upsert_master.add_argument("--record", required=True)
-    add_master = sub.add_parser("add-from-master"); add_master.add_argument("--date"); add_master.add_argument("--date-source", choices=("inferred", "user_explicit"), default="inferred"); add_master.add_argument("--food-master-id", required=True); add_master.add_argument("--meal", required=True); add_master.add_argument("--amount", required=True); add_master.add_argument("--factor", type=float, default=1.0)
+    add_master = sub.add_parser("add-from-master"); add_master.add_argument("--date"); add_master.add_argument("--date-source", choices=("inferred", "user_explicit"), default="inferred"); add_master.add_argument("--food-master-id", required=True); add_master.add_argument("--meal", required=True); add_master.add_argument("--amount", required=True); add_master.add_argument("--factor", type=float); add_master.add_argument("--servings", type=float); add_master.add_argument("--amount-grams", type=float)
     args = p.parse_args()
+    args.state = args.state or str(default_state_path(args.ledger))
+    if args.command == "setup-import":
+        print(json.dumps(setup_import(args.source_dir, args.ledger, args.state, args.force), indent=2)); return
     if args.command == "init":
         ledger_path = Path(args.ledger)
         if ledger_path.exists() and not args.force:
@@ -609,6 +713,8 @@ def main():
     if args.command in ("panel", "foods"):
         report_date = current_local_date(ledger) if args.date in (None, "today") else args.date
         print(render_daily_report(ledger, report_date, view=args.command)); return
+    if args.command == "entry-template":
+        print(json.dumps(entry_template(ledger, args.meal, args.food_product), indent=2)); return
     if args.command == "food-master-find":
         terms = set(re.sub(r"[^a-z0-9]+", " ", args.query.lower()).split())
         matches = []
@@ -616,7 +722,10 @@ def main():
             hay = re.sub(r"[^a-z0-9]+", " ", " ".join(str(master.get(k, "")) for k in ("food_name", "brand", "variant_flavor", "upc_barcode")).lower())
             score = sum(1 for term in terms if term in hay)
             if score: matches.append((score, master))
-        print(json.dumps([m for _, m in sorted(matches, key=lambda x: -x[0])[:10]], indent=2)); return
+        rows = [m for _, m in sorted(matches, key=lambda x: -x[0])[:max(args.limit, 1)]]
+        if args.summary:
+            rows = [summarize_food_master(master) for master in rows]
+        print(json.dumps(rows, indent=2)); return
     if args.command == "rebuild-state":
         state = rebuild(ledger, args.state, args.date)
         atomic_write(args.ledger, ledger)
@@ -638,16 +747,17 @@ def main():
         if len(matches) != 1:
             raise SystemExit(f"food master not found or ambiguous: {args.food_master_id}")
         master = matches[0]
+        factor = master_factor(args, master)
         fields = {
             "meal_category": args.meal, "food_product": master.get("food_name"),
             "brand_restaurant_source": master.get("brand"), "amount_weight": args.amount,
             "food_master_id": master.get("food_master_id"), "source_id": master.get("source_url_or_id"),
             "accuracy": "reused_food_master", "is_estimate": False,
-            "notes": f"Scaled {args.factor:g}× from food master {master.get('food_master_id')}.",
+            "notes": f"Scaled {factor:g}x from food master {master.get('food_master_id')}.",
         }
         for nutrient in nutrient_fields(ledger):
             value = master.get("nutrients", {}).get(nutrient)
-            fields[nutrient] = round(value * args.factor, 6) if value is not None else None
+            fields[nutrient] = round(value * factor, 6) if value is not None else None
         fields["nutrient_provenance"] = json.loads(json.dumps(master.get("nutrient_provenance", {})))
         fields = ensure_v2_entry(ledger, fields, stamp)
         entry = {"entry_id": next_id(ledger["entries"], args.date), "date": args.date, "date_source": args.date_source, **fields}

@@ -7,3 +7,7 @@ __pycache__/
 nutrition_ledger.json
 nutrition_state.json
 data/
+food_log_package_sources/
+Fitness_Ledger_Nutrition_Ledger.json
+Fitness_Ledger_Nutrition_Current_State.json
+assistant.snapshot.db
