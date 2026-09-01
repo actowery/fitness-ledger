@@ -132,6 +132,17 @@ def render_daily_report(ledger, date, view="panel"):
             lines.append(f"{meal} — {len(entries)} {item_word} | {_kcal(_complete_total(entries, 'calories'))} | P {_grams(_complete_total(entries, 'protein_g'))}")
             lines.extend(_food_line(entry) for entry in entries)
 
+    if view == "foods":
+        water_oz = totals.get("water_oz")
+        hydration = "not logged" if water_oz is None else f"{round(float(water_oz) * 29.5735):,.0f} mL ({float(water_oz):.1f} fl oz)"
+        lines.extend([
+            "",
+            "Daily totals",
+            f"Calories: {_kcal(totals.get('calories'))} | Protein: {_grams(totals.get('protein_g'))}",
+            f"Carbs: {_grams(totals.get('carbohydrates_g'))} | Fat: {_grams(totals.get('fat_g'))} | Fiber: {_grams(totals.get('fiber_g'))}",
+            f"Hydration: {hydration}",
+        ])
+
     lines.extend([
         "",
         "Data quality",
@@ -592,11 +603,11 @@ def main():
         print(json.dumps({"valid": not errors, "errors": errors}, indent=2))
         raise SystemExit(1 if errors else 0)
     if args.command == "day":
-        report_date = args.date or current_local_date(ledger)
+        report_date = current_local_date(ledger) if args.date in (None, "today") else args.date
         totals, rows = totals_for(ledger, report_date)
         print(json.dumps({"date": report_date, "timezone": timezone_name_for(ledger), "totals": totals, "confidence": confidence_for(ledger, rows), "entries": rows, "body_weight_lb": weight_for(ledger, report_date)}, indent=2)); return
     if args.command in ("panel", "foods"):
-        report_date = args.date or current_local_date(ledger)
+        report_date = current_local_date(ledger) if args.date in (None, "today") else args.date
         print(render_daily_report(ledger, report_date, view=args.command)); return
     if args.command == "food-master-find":
         terms = set(re.sub(r"[^a-z0-9]+", " ", args.query.lower()).split())
