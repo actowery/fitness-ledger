@@ -27,10 +27,10 @@ For multiple foods, I’d use one `Logged Foods` table, then the same single agg
 
 **Target Progress**
 
-Calories: 1,742 / 2,000 kcal  
-Protein: 142.29 / 160 g  
-Carbs: 137.60 / 190 g  
-Fat: 69.06 / 67 g  
+Calories: 1,742 / 2,000 kcal
+Protein: 142.29 / 160 g
+Carbs: 137.60 / 190 g
+Fat: 69.06 / 67 g
 Fiber: 13.00 / 30 g minimum
 
 Logged and verified. Source: [gimMe seaweed snack label](https://example.com/source)
@@ -41,7 +41,7 @@ Aplenty spanakopita was scaled from the listed 86 g serving to 4 oz. Product ide
 
 **Sources**
 
-Aplenty Greek-style spanakopita: package nutrition reference, URL unavailable.  
+Aplenty Greek-style spanakopita: package nutrition reference, URL unavailable.
 USDA FoodData Central: generic nutrient reference, URL unavailable.
 
 **Logged Food**
@@ -93,7 +93,7 @@ Logged and verified.
 
 Sources
 
-[Aplenty Greek-style spanakopita reference](https://android.fatsecret.com/calories-nutrition/aplenty/greek-style-spanakopita)  
+[Aplenty Greek-style spanakopita reference](https://android.fatsecret.com/calories-nutrition/aplenty/greek-style-spanakopita)
 [gimMe roasted seaweed snack label/reference](https://example.com/source)
 
 **Logged Food**
