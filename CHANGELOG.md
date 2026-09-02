@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.7 - 2026-09-02
+
+- Enforce fail-closed nutrition output formatting and catalogue integrity validation.
+
 ## 1.2.6 - 2026-09-01
 
 - Include food water in hydration reporting

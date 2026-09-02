@@ -12,13 +12,20 @@ The ledger is a JSON object with `entries`, `weights`, `food_master`, `audit_log
 
 New or upgraded food masters may include `gtin`/`upc`, `brand_owner`,
 `manufacturer`, `product_name`, `variant`, `package_size`, `serving_size`,
-`serving_unit`, `source_product_id`, `fdc_id`, `source_url`,
+`serving_unit`, `source_product_id`, `fdc_id`, `source_url`, `source_urls`,
 `label_effective_date`, `first_seen_at`, `last_verified_at`,
 `verification_source`, `formulation_hash`, `food_master_version`,
 `supersedes_food_master_id`, and `status`. These fields are optional because
 unknown identity facts remain unknown. `formulation_hash` is a deterministic
 fingerprint of stable declared serving, macro, sodium/potassium, and ingredient
 attributes; it detects change but is not a security identifier.
+
+`source_urls` is the canonical multi-source field for recipe and composite food
+masters. It is an array of direct URLs, one per ingredient or source record.
+Legacy `source_url` remains accepted for a single URL. A legacy comma-separated
+source string must be normalized into `source_urls` before reuse; commas inside
+URLs are not valid separators. Every URL must be retrievable and correspond to
+the nutrient values it supports.
 
 The bundled `product_identity.py` resolver uses exact GTIN first, then exact
 non-GTIN identity only when the query contains sufficient attributes. Duplicate

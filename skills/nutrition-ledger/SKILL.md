@@ -93,6 +93,40 @@ Initialization may store a preferred daily combined synchronization time. Do not
 
 ## Daily reports
 
+## Absolute nutrition-output invariant
+
+This section governs every human-readable nutrition response, including food
+adds, multi-food adds, recipe adds, corrections, deletions, hydration logs,
+weight logs, target changes, daily reports, weekly reports, and panels. It has
+priority over any instruction to be concise.
+
+- Nutrition responses are typed Markdown documents generated from the
+  canonical output contract, never free-form conversational summaries.
+- Prose, bullets, sentence-form totals, alternate layouts, abbreviated tables,
+  paraphrased tables, and selected-nutrient summaries are prohibited for
+  nutrition data.
+- Every food mutation MUST contain a `Logged Food` or `Logged Foods` Markdown
+  table followed by a `Today So Far` Markdown table. The item table MUST use
+  the approved columns, including `Water Added`; the totals table MUST use the
+  approved metric rows and target column.
+- Every response MUST include the required status, target-progress, and
+  persistence/read-back information in the approved locations. Include a
+  `Data quality` section whenever an item is estimated, held, ambiguous,
+  partially completed, or has unknown values. `Sources` MUST be last whenever
+  source links exist.
+- A partial mutation MUST be reported structurally: logged items belong in the
+  logged-items table, and unlogged or held items belong in a clearly labeled
+  structured data-quality section. Do not hide partial completion in prose.
+- Unknown values MUST be table cells containing `unknown`; never omit a column,
+  row, nutrient, item, or status because its value is unavailable.
+- Before sending, validate the rendered response for required headings, section
+  order, table headers, column counts, row presence, units, unknown handling,
+  and source placement. If validation fails, fail closed: do not substitute
+  prose; repair and re-render, or report a formatting failure.
+- Do not manually compose a nutrition response when the canonical renderer or
+  approved example contract is available. Relay canonical renderer output
+  verbatim for reports.
+
 All human-readable nutrition reports use one stable Markdown table contract. No conversational response should vary the style, section names, column order, units, or handling of unknowns unless the user explicitly asks for raw JSON or a one-off export format. For `panel`, `foods`, `daily-totals`, and `weekly-totals`, relay the renderer output verbatim and in full. This is a hard output invariant: never collapse any report into prose, a code-block summary, partial highlights, selected nutrients, or "key foods"; never paraphrase or truncate the tables. Only produce a summary when the user explicitly asks for a summary instead of the report.
 
 Canonical report grammar:
@@ -155,13 +189,25 @@ For micronutrients, show every tracked nutrient amount, DRV context, and `unknow
 
 Vitamin labels must include both the standard letter/number designation and the common name, such as `Vitamin B1 (Thiamin)`, `Vitamin B2 (Riboflavin)`, `Vitamin B3 (Niacin)`, `Vitamin B5 (Pantothenic acid)`, `Vitamin B6`, `Vitamin B7 (Biotin)`, `Vitamin B9 (Folate)`, and `Vitamin B12 (Cobalamin)`.
 
-## Conversational output after a successful log
+## Output after a successful mutation
 
-Keep simple mutations concise. For a food log, use this order: (1) identify the item just added and show its general nutrition values; (2) show the aggregate calories, macros, fiber, and hydration totals for everything logged today; (3) add only a small trailing blurb for target progress and persistence/read-back status. Do not print the full foods or micronutrients tables unless the user asks for a panel or report. For hydration and weight logs, show the confirmed mutation followed by the same compact aggregate day totals. When a panel or report is requested, the hard verbatim-report invariant above overrides concise-output preferences. Include explicit persistence/read-back confirmation including the verified ledger revision when available. Material estimates, assumptions, or unresolved identity issues may be included briefly under `Data quality`.
+Use the absolute nutrition-output invariant above for every mutation. A food,
+recipe, hydration, weight, correction, deletion, or target mutation MUST use
+the applicable approved Markdown table contract; “concise” means omit unrelated
+detail, not that tables may be replaced with prose. Include explicit
+persistence/read-back confirmation, including the verified ledger revision when
+available. Material estimates, assumptions, or unresolved identity issues
+belong only in the structured `Data quality` section.
 
-Corrections, deletions, target changes, and other mutations should use the same concise confirmation pattern unless the user requests a full report.
+When a mutation uses an external product page, food database, or other web reference, append a `Sources` section after `Data quality` with compact Markdown links to the sources used for the logged item. Keep source links at the bottom of the response and distinguish product-label sources from estimates when relevant. Do not invent URLs. If a source has no retrievable link, it cannot be used as sourced provenance.
 
-When a mutation uses an external product page, food database, or other web reference, append a `Sources` section after `Data quality` with compact Markdown links to the sources used for the logged item. Keep source links at the bottom of the response and distinguish product-label sources from estimates when relevant. Do not invent URLs; if no link is available, name the source without a fabricated link.
+### Mandatory source-link gate
+
+Every nutrient value obtained from an external source must have a retrievable Markdown link recorded in the entry provenance and shown in the response's `Sources` section. This applies to every source type, including USDA, manufacturer labels, retailer pages, and third-party databases. A USDA claim requires a direct USDA/FoodData Central link; do not label remembered, inferred, or generic values as USDA-derived without that link. Never use memory, educated guessing, or an unlinked "USDA-style" profile to fill nutrient values. If a suitable linked source cannot be found, do not silently estimate or log the item as verified: ask for a package label/product link or explicitly log it only as an unverified estimate after the user agrees.
+
+Every food master/catalogue record must include a direct `source_url` (or an equivalent direct URL in its source metadata) for the nutrient profile. When a recipe is reused, cite the local recipe/catalogue record in the response rather than repeating every ingredient link, but retain the ingredient-level source URLs in the saved records. Before using an existing record, check that its source URL is present and retrievable; records without one are not eligible for silent reuse and must be backfilled or held for source verification.
+
+Recipe and composite food masters may have multiple sources. Store them as a `source_urls` array of direct URLs, one per ingredient/source, rather than as an opaque prose string. Accept legacy comma-separated source values only as an input format and normalize them to the array before reuse. A reused recipe response may cite the local catalogue record, but the catalogue record must retain all ingredient-level links. Backfill the catalogue source by source; never invent, infer, or silently preserve an unlinked source claim.
 
 ## Safety boundary
 
