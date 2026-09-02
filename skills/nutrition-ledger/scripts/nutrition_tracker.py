@@ -201,6 +201,16 @@ def _food_label(entry):
     return label
 
 
+def source_urls(record):
+    """Return normalized direct source URLs without treating IDs as links."""
+    values = record.get("source_urls")
+    if values is None:
+        values = record.get("source_url") or record.get("source_url_or_id")
+    if isinstance(values, str):
+        values = [values]
+    return [value.strip() for value in (values or []) if isinstance(value, str) and value.strip().startswith("http")]
+
+
 def _food_rows(rows):
     table_rows = []
     for meal, entries in _meal_sections(rows):
@@ -755,6 +765,7 @@ def summarize_food_master(master):
         "fiber_g": nutrients.get("fiber_g"),
         "source_type": master.get("source_type"),
         "source_url_or_id": master.get("source_url_or_id"),
+        "source_urls": source_urls(master),
     }
 
 
@@ -979,7 +990,7 @@ def main():
         fields = {
             "meal_category": args.meal, "food_product": master.get("food_name"),
             "brand_restaurant_source": master.get("brand"), "amount_weight": args.amount,
-            "food_master_id": master.get("food_master_id"), "source_id": master.get("source_url_or_id"),
+            "food_master_id": master.get("food_master_id"), "source_id": (source_urls(master) or [master.get("source_url_or_id")])[0],
             "accuracy": "reused_food_master", "is_estimate": False,
             "notes": f"Scaled {factor:g}x from food master {master.get('food_master_id')}.",
         }
