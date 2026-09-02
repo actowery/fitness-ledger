@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.8 - 2026-09-02
+
+- Harden catalogue validation and clean nutrition examples.
+
 ## 1.2.7 - 2026-09-02
 
 - Enforce fail-closed nutrition output formatting and catalogue integrity validation.

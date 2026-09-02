@@ -40,8 +40,8 @@ Aplenty spanakopita was scaled from the listed 86 g serving to 4 oz. Product ide
 Sources
 
 Aplenty Greek-style spanakopita: [package nutrition reference](https://android.fatsecret.com/calories-nutrition/aplenty/greek-style-spanakopita).
-[gimMe roasted seaweed snack label/reference](https://gimmesnacks.com/products/organic-seaweed-snacks/), illustrative source link.
-[USDA FoodData Central](https://fdc.nal.usda.gov/), generic nutrient reference.
+[gimMe roasted seaweed snack label/reference](https://gimmesnacks.com/products/organic-seaweed-snacks/).
+[USDA FoodData Central](https://fdc.nal.usda.gov/), generic nutrient reference example; real logs must link the specific FDC item page used.
 
 Source-link rule: every source used for a logged nutrient value must have a retrievable Markdown link. Do not use `URL unavailable` as provenance for a sourced value; obtain a link, request one from the user, or stop short of logging the sourced value.
 

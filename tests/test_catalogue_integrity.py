@@ -32,6 +32,14 @@ class CatalogueIntegrityTests(unittest.TestCase):
         self.assertTrue(any("source_urls[0]" in issue for issue in issues))
         self.assertTrue(any("source_urls[1]" in issue for issue in issues))
 
+    def test_rejects_invalid_hostname_characters(self):
+        issues = catalogue_issues([complete_master(source_urls=["https://bad_host.example/source"])])
+        self.assertTrue(any("source_urls[0]" in issue for issue in issues))
+
+    def test_reports_non_mapping_master_instead_of_crashing(self):
+        issues = catalogue_issues([None])
+        self.assertEqual(issues, ["unknown: food-master record must be an object"])
+
     def test_rejects_primary_url_mismatch(self):
         issues = catalogue_issues([complete_master(source_url="https://example.com/other")])
         self.assertTrue(any("source_url must equal source_urls[0]" in issue for issue in issues))
