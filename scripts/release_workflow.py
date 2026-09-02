@@ -163,7 +163,8 @@ def wait_for_copilot_review(pr: str, wait_minutes: float = 5.0, poll_seconds: fl
             body = latest.get("body") or ""
             if "Changes recommended" in body or "Changes requested" in body:
                 raise ValueError("Copilot review recommends changes; do not merge or tag")
-            return
+            if time.monotonic() >= deadline:
+                return
         if time.monotonic() >= deadline:
             raise TimeoutError("Copilot review did not complete within the configured wait")
         time.sleep(min(poll_interval, max(0.0, deadline - time.monotonic())))

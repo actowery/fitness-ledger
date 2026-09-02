@@ -72,12 +72,13 @@ class ReleaseWorkflowTests(unittest.TestCase):
             with self.assertRaisesRegex(TimeoutError, "did not complete"):
                 release_workflow.wait_for_copilot_review("1", wait_minutes=0, poll_seconds=0)
 
-    def test_review_gate_accepts_current_head_review_immediately(self) -> None:
+    def test_review_gate_waits_full_window_after_current_head_review(self) -> None:
         response = {"headRefOid": "abc", "reviews": [{"author": {"login": "copilot-pull-request-reviewer"}, "commit": {"oid": "abc"}, "submittedAt": "2026-09-02T00:00:00Z", "body": "### Looks good"}]}
         with mock.patch("subprocess.run", return_value=mock.Mock(stdout=json.dumps(response))):
-            with mock.patch.object(release_workflow.time, "sleep") as sleep:
-                release_workflow.wait_for_copilot_review("1", wait_minutes=5, poll_seconds=0)
-                sleep.assert_not_called()
+            with mock.patch.object(release_workflow.time, "monotonic", side_effect=[0, 0, 0, 300]):
+                with mock.patch.object(release_workflow.time, "sleep") as sleep:
+                    release_workflow.wait_for_copilot_review("1", wait_minutes=5, poll_seconds=0)
+                    sleep.assert_called_once_with(1.0)
 
 
 if __name__ == "__main__":
