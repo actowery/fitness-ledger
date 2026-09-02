@@ -21,7 +21,7 @@ NUTRIENT_FIELDS = (
 )
 
 
-def catalogue_issues(masters: Sequence[Mapping[str, Any]]) -> list[str]:
+def catalogue_issues(masters: Sequence[Any]) -> list[str]:
     """Return deterministic, human-readable integrity errors for food masters."""
     issues: list[str] = []
     for master in masters:
