@@ -47,7 +47,7 @@ USDA FoodData Central: generic nutrient reference, URL unavailable.
 **Logged Food**
 
 | Food | Amount | Calories | Protein | Carbs | Fat | Fiber |
-| --- | --- | ---: | ---: | ---: | ---: |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
 | Whole milk | 128 g | 78 kcal | 4.04 g | 6.13 g | 4.18 g | 0.00 g |
 
 **Today So Far**
