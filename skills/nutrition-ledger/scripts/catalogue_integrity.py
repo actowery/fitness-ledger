@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+import re
 from typing import Any
 from urllib.parse import urlparse
 
@@ -24,6 +25,9 @@ def catalogue_issues(masters: Sequence[Mapping[str, Any]]) -> list[str]:
     """Return deterministic, human-readable integrity errors for food masters."""
     issues: list[str] = []
     for master in masters:
+        if not isinstance(master, Mapping):
+            issues.append("unknown: food-master record must be an object")
+            continue
         identity = master.get("food_master_id") or master.get("food_name") or "unknown"
         urls = master.get("source_urls")
         if not isinstance(urls, list) or not urls:
@@ -36,7 +40,9 @@ def catalogue_issues(masters: Sequence[Mapping[str, Any]]) -> list[str]:
                 if (parsed is None or parsed.scheme not in {"http", "https"} or
                         not parsed.netloc or len(hostname_parts) < 2 or
                         any(not part for part in hostname_parts) or
-                        len(hostname_parts[-1]) < 2):
+                        len(hostname_parts[-1]) < 2 or
+                        any(not re.fullmatch(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?", part)
+                            for part in hostname_parts)):
                     issues.append(f"{identity}: source_urls[{index}] is not a valid HTTP(S) URL")
             if master.get("source_url") != urls[0]:
                 issues.append(f"{identity}: source_url must equal source_urls[0]")
