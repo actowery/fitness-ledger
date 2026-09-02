@@ -157,7 +157,7 @@ Vitamin labels must include both the standard letter/number designation and the 
 
 ## Conversational output after a successful log
 
-Keep simple mutations concise. For a food, hydration, or weight log, show the confirmed mutation and the updated `Daily Totals` table only; do not print the full foods and micronutrients tables unless the user asks for a panel or report. When a panel or report is requested, the hard verbatim-report invariant above overrides concise-output preferences. Include explicit persistence/read-back confirmation including the verified ledger revision when available. Material estimates, assumptions, or unresolved identity issues may be included briefly under `Data quality`.
+Keep simple mutations concise. For a food log, use this order: (1) identify the item just added and show its general nutrition values; (2) show the aggregate calories, macros, fiber, and hydration totals for everything logged today; (3) add only a small trailing blurb for target progress and persistence/read-back status. Do not print the full foods or micronutrients tables unless the user asks for a panel or report. For hydration and weight logs, show the confirmed mutation followed by the same compact aggregate day totals. When a panel or report is requested, the hard verbatim-report invariant above overrides concise-output preferences. Include explicit persistence/read-back confirmation including the verified ledger revision when available. Material estimates, assumptions, or unresolved identity issues may be included briefly under `Data quality`.
 
 Corrections, deletions, target changes, and other mutations should use the same concise confirmation pattern unless the user requests a full report.
 
@@ -168,5 +168,7 @@ When a mutation uses an external product page, food database, or other web refer
 This is a data-quality and tracking workflow, not medical diagnosis or treatment. Do not infer deficiencies from one day or incomplete coverage. Keep the user in control of mutations and do not transmit ledger contents to external services unless explicitly requested.
 
 Read [the schema reference](references/schema.md) before modifying schema, provenance, cache, or workbook behavior.
+
+For the canonical food-add response examples, read [references/add-output-examples.md](references/add-output-examples.md). Use those examples exactly when formatting single-food, multi-food, estimate, data-quality, source, and ordering cases.
 
 The offline reference modules in `scripts/` expose identity/versioning, confidence, coverage, source resolution, barcode, enrichment, invariants, debt, longitudinal, contribution, activity-join, migration, and Library-revision primitives. They are testable building blocks; runtime persistence must still follow the Library contract above.

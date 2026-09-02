@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.5 - 2026-09-01
+
+- Add canonical food logging output examples.
+
 ## 1.2.4 - 2026-09-01
 
 - Add vitamin letter and number labels to nutrition panels.
