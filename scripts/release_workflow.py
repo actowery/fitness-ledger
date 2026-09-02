@@ -149,6 +149,9 @@ def ensure_release(tag: str) -> None:
 
 def wait_for_copilot_review(pr: str, wait_minutes: float = 5.0, poll_seconds: float = 15.0) -> None:
     """Wait for a current-head Copilot review and fail on recommended changes."""
+    if wait_minutes < 0:
+        raise ValueError("wait_minutes must be non-negative")
+    poll_interval = max(1.0, poll_seconds)
     deadline = time.monotonic() + wait_minutes * 60
     while True:
         result = subprocess.run(["gh", "pr", "view", pr, "--json", "headRefOid,reviews"], cwd=ROOT, check=True, capture_output=True, text=True)
@@ -160,11 +163,10 @@ def wait_for_copilot_review(pr: str, wait_minutes: float = 5.0, poll_seconds: fl
             body = latest.get("body") or ""
             if "Changes recommended" in body or "Changes requested" in body:
                 raise ValueError("Copilot review recommends changes; do not merge or tag")
-            if time.monotonic() >= deadline:
-                return
+            return
         if time.monotonic() >= deadline:
             raise TimeoutError("Copilot review did not complete within the configured wait")
-        time.sleep(min(poll_seconds, max(0.0, deadline - time.monotonic())))
+        time.sleep(min(poll_interval, max(0.0, deadline - time.monotonic())))
 
 
 def validate_tag_release_options(push: bool, create_release: bool) -> None:
