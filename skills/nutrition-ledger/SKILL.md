@@ -169,6 +169,6 @@ This is a data-quality and tracking workflow, not medical diagnosis or treatment
 
 Read [the schema reference](references/schema.md) before modifying schema, provenance, cache, or workbook behavior.
 
-For the canonical food-add response examples, read [references/add-output-examples.md](references/add-output-examples.md). Use those examples exactly when formatting single-food, multi-food, estimate, data-quality, source, and ordering cases.
+For the canonical food-add response examples, read [references/add-output-examples.md](references/add-output-examples.md). Follow their section order, headings, and placement rules when formatting single-food, multi-food, estimate, data-quality, source, and ordering cases, while treating the numeric values and any real links as illustrative rather than mandatory.
 
 The offline reference modules in `scripts/` expose identity/versioning, confidence, coverage, source resolution, barcode, enrichment, invariants, debt, longitudinal, contribution, activity-join, migration, and Library-revision primitives. They are testable building blocks; runtime persistence must still follow the Library contract above.

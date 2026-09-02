@@ -16,32 +16,33 @@ For one food:
 
 Target progress: 1,820 / 2,000 kcal; 146.33 / 160 g protein; 143.73 / 190 g carbs; 73.24 / 67 g fat; 13 / 30 g fiber. Logged and verified.
 
-For multiple foods, I’d use one `Logged Foods` table, then the same single aggregate `Today So Far` table:
+For multiple foods, keep one `Logged Foods` table, then the same aggregate `Today So Far` summary; the fuller metric-table variant appears later in this file:
 
 **Logged Foods**
 
 | Meal | Food | Amount | Calories | Protein | Carbs | Fat | Fiber |
 | --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
-| Snacks | Walnuts | 10 g | 65 kcal | 1.52 g | 1.37 g | 6.52 g | 0.67 g |
-| Snacks | Seaweed snack | 5 g | 30 kcal | 1.00 g | 1.00 g | 2.00 g | 1.00 g |
+| Snacks | Aplenty Greek-style spanakopita | 4 oz | 251 kcal | 9.23 g | 30.32 g | 9.23 g | 1.32 g |
+| Snacks | Roasted seaweed snack | 5 g | 30 kcal | 1.00 g | 1.00 g | 2.00 g | 1.00 g |
 
-**Target Progress**
+**Today So Far**
 
-Calories: 1,742 / 2,000 kcal
-Protein: 142.29 / 160 g
-Carbs: 137.60 / 190 g
-Fat: 69.06 / 67 g
-Fiber: 13.00 / 30 g minimum
+| Calories | Protein | Carbs | Fat | Fiber | Water |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 2,101 kcal | 156.56 g | 175.05 g | 82.47 g | 15.32 g | 24.0 fl oz |
 
-Logged and verified. Source: [gimMe seaweed snack label](https://example.com/source)
+Target progress: 2,101 / 2,000 kcal; 156.56 / 160 g protein; 175.05 / 190 g carbs; 82.47 / 67 g fat; 15.32 / 30 g fiber.
 
-**Data Quality**
+Logged and verified.
+
+**Data quality**
 
 Aplenty spanakopita was scaled from the listed 86 g serving to 4 oz. Product identity was matched to the reported brand. Missing nutrient values remain `unknown`; they are not treated as zero.
 
 **Sources**
 
 Aplenty Greek-style spanakopita: package nutrition reference, URL unavailable.
+gimMe roasted seaweed snack label/reference, URL unavailable.
 USDA FoodData Central: generic nutrient reference, URL unavailable.
 
 **Logged Food**
@@ -91,15 +92,15 @@ Target progress: 2,101 / 2,000 kcal; 156.56 / 160 g protein; 175.05 / 190 g carb
 
 Logged and verified.
 
-Sources
+**Sources**
 
 [Aplenty Greek-style spanakopita reference](https://android.fatsecret.com/calories-nutrition/aplenty/greek-style-spanakopita)
-[gimMe roasted seaweed snack label/reference](https://example.com/source)
+gimMe roasted seaweed snack label/reference, URL unavailable.
 
 **Logged Food**
 
 | Food | Amount | Calories | Protein | Carbs | Fat | Fiber |
-| --- | --- | ---: | ---: | ---: | ---: |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
 | Unbranded bakery pastry | 1 piece | 280 kcal | 4.00 g | 38.00 g | 12.00 g | unknown |
 
 **Today So Far**
@@ -119,7 +120,7 @@ Target progress: Calories, carbs, and fat are over target; protein is met; 14.68
 
 Logged and verified.
 
-Data quality
+**Data quality**
 
 Fiber was not available from the source and remains `unknown`. This item is an estimate pending product or package details.
 
