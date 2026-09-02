@@ -16,7 +16,7 @@ For one food:
 
 Target progress: 1,820 / 2,000 kcal; 146.33 / 160 g protein; 143.73 / 190 g carbs; 73.24 / 67 g fat; 13 / 30 g fiber. Logged and verified.
 
-For multiple foods, keep one `Logged Foods` table, then the same aggregate `Today So Far` summary; the fuller metric-table variant appears later in this file:
+For multiple foods, use one `Logged Foods` table followed by the full `Today So Far` table shown later in this reference.
 
 **Logged Foods**
 
@@ -31,15 +31,13 @@ For multiple foods, keep one `Logged Foods` table, then the same aggregate `Toda
 | ---: | ---: | ---: | ---: | ---: | ---: |
 | 2,101 kcal | 156.56 g | 175.05 g | 84.47 g | 15.32 g | 24.0 fl oz |
 
-Target progress: 2,101 / 2,000 kcal; 156.56 / 160 g protein; 175.05 / 190 g carbs; 84.47 / 67 g fat; 15.32 / 30 g fiber.
-
 Logged and verified.
 
-**Data quality**
+Data quality
 
 Aplenty spanakopita was scaled from the listed 86 g serving to 4 oz. Product identity was matched to the reported brand. Missing nutrient values remain `unknown`; they are not treated as zero.
 
-**Sources**
+Sources
 
 Aplenty Greek-style spanakopita: package nutrition reference, URL unavailable.
 gimMe roasted seaweed snack label/reference, URL unavailable.
