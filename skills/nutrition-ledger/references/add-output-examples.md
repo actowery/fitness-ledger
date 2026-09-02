@@ -29,9 +29,9 @@ For multiple foods, keep one `Logged Foods` table, then the same aggregate `Toda
 
 | Calories | Protein | Carbs | Fat | Fiber | Water |
 | ---: | ---: | ---: | ---: | ---: | ---: |
-| 2,101 kcal | 156.56 g | 175.05 g | 82.47 g | 15.32 g | 24.0 fl oz |
+| 2,101 kcal | 156.56 g | 175.05 g | 84.47 g | 15.32 g | 24.0 fl oz |
 
-Target progress: 2,101 / 2,000 kcal; 156.56 / 160 g protein; 175.05 / 190 g carbs; 82.47 / 67 g fat; 15.32 / 30 g fiber.
+Target progress: 2,101 / 2,000 kcal; 156.56 / 160 g protein; 175.05 / 190 g carbs; 84.47 / 67 g fat; 15.32 / 30 g fiber.
 
 Logged and verified.
 
@@ -84,11 +84,11 @@ Logged and verified.
 | Calories | 2,101 kcal | 2,101 / 2,000 (101 over) |
 | Protein | 156.56 g | 156.56 / 160 (3.44 remaining) |
 | Carbs | 175.05 g | 175.05 / 190 (14.95 remaining) |
-| Fat | 82.47 g | 82.47 / 67 (15.47 over) |
+| Fat | 84.47 g | 84.47 / 67 (17.47 over) |
 | Fiber | 15.32 g | 15.32 / 30 (14.68 remaining) |
 | Hydration | 710 mL (24.0 fl oz) | tracked drinking water |
 
-Target progress: 2,101 / 2,000 kcal; 156.56 / 160 g protein; 175.05 / 190 g carbs; 82.47 / 67 g fat; 15.32 / 30 g fiber.
+Target progress: 2,101 / 2,000 kcal; 156.56 / 160 g protein; 175.05 / 190 g carbs; 84.47 / 67 g fat; 15.32 / 30 g fiber.
 
 Logged and verified.
 
