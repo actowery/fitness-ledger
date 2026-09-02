@@ -214,12 +214,18 @@ def _food_rows(rows):
                 _amount(entry.get("carbohydrates_g"), "carbohydrates_g"),
                 _amount(entry.get("fat_g"), "fat_g"),
                 _amount(entry.get("fiber_g"), "fiber_g"),
+                _amount(entry.get("water_g"), "water_g"),
             ])
     return table_rows
 
 
 def _daily_macro_rows(ledger, totals, rows, date):
     water_oz = totals.get("water_oz")
+    food_water_g = totals.get("water_g") or 0
+    if water_oz is not None:
+        water_oz = float(water_oz) + float(food_water_g) / 29.5735
+    elif food_water_g:
+        water_oz = float(food_water_g) / 29.5735
     hydration = "unknown" if water_oz is None else f"{round(float(water_oz) * 29.5735):,.0f} mL ({float(water_oz):,.1f} fl oz)"
     weight = weight_for(ledger, date)
     return [
@@ -230,7 +236,7 @@ def _daily_macro_rows(ledger, totals, rows, date):
         ["Carbs", _amount(totals.get("carbohydrates_g"), "carbohydrates_g"), _target_progress(totals.get("carbohydrates_g"), _target_for(ledger, "carbohydrates_g"), "carbohydrates_g")],
         ["Fat", _amount(totals.get("fat_g"), "fat_g"), _target_progress(totals.get("fat_g"), _target_for(ledger, "fat_g"), "fat_g")],
         ["Fiber", _amount(totals.get("fiber_g"), "fiber_g"), _target_progress(totals.get("fiber_g"), _target_for(ledger, "fiber_g"), "fiber_g")],
-        ["Hydration", hydration, "tracked drinking water"],
+        ["Hydration", hydration, "drinks + food water"],
     ]
 
 
@@ -259,9 +265,9 @@ def render_daily_report(ledger, date, view="panel"):
     lines.extend(["", "Foods"])
     food_rows = _food_rows(rows)
     if food_rows:
-        lines.extend(_markdown_table(["Meal", "Food", "Amount", "Calories", "Protein", "Carbs", "Fat", "Fiber"], food_rows))
+        lines.extend(_markdown_table(["Meal", "Food", "Amount", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Water Added"], food_rows))
     else:
-        lines.extend(_markdown_table(["Meal", "Food", "Amount", "Calories", "Protein", "Carbs", "Fat", "Fiber"], [["-", "No foods logged", "-", "unknown", "unknown", "unknown", "unknown", "unknown"]]))
+        lines.extend(_markdown_table(["Meal", "Food", "Amount", "Calories", "Protein", "Carbs", "Fat", "Fiber", "Water Added"], [["-", "No foods logged", "-", "unknown", "unknown", "unknown", "unknown", "unknown", "unknown"]]))
 
     if view == "panel":
         lines.extend(["", "Micronutrients"])

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.6 - 2026-09-01
+
+- Include food water in hydration reporting
+
 ## 1.2.5 - 2026-09-01
 
 - Add canonical food logging output examples.

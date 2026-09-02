@@ -34,7 +34,7 @@ class NutritionReportingTests(unittest.TestCase):
             },
             "nutrient_units": {
                 "calories": "kcal", "protein_g": "g", "carbohydrates_g": "g",
-                "fat_g": "g", "fiber_g": "g", "water_oz": "fl oz",
+                "fat_g": "g", "fiber_g": "g", "water_g": "g", "water_oz": "fl oz",
             },
             "entries": [
                 {"entry_id": "3", "date": "2026-08-30", "meal_category": "snack", "food_product": "Kiwi | gold", "amount_weight": "80 g\nweighed", "calories": 49, "protein_g": 0.9, "carbohydrates_g": 12, "fat_g": 0.4, "fiber_g": 2.4, "water_oz": None, "vitamin_c_mg": 74, "deleted_at": None},
@@ -70,8 +70,8 @@ class NutritionReportingTests(unittest.TestCase):
     def test_panel_keeps_full_standardized_sections(self):
         report = tracker.render_daily_report(self.ledger(), "2026-08-30", view="panel")
 
-        self.assertLess(report.index("Daily Totals\n| Metric | Amount | Target |"), report.index("Foods\n| Meal | Food | Amount | Calories | Protein | Carbs | Fat | Fiber |"))
-        self.assertLess(report.index("Foods\n| Meal | Food | Amount | Calories | Protein | Carbs | Fat | Fiber |"), report.index("Micronutrients\n| Nutrient | Amount | DRV % |"))
+        self.assertLess(report.index("Daily Totals\n| Metric | Amount | Target |"), report.index("Foods\n| Meal | Food | Amount | Calories | Protein | Carbs | Fat | Fiber | Water Added |"))
+        self.assertLess(report.index("Foods\n| Meal | Food | Amount | Calories | Protein | Carbs | Fat | Fiber | Water Added |"), report.index("Micronutrients\n| Nutrient | Amount | DRV % |"))
         self.assertLess(report.index("Micronutrients\n| Nutrient | Amount | DRV % |"), report.index("Data quality\nActive entries only. Unknown means untracked, not zero."))
         self.assertIn("| Vitamin B7 (Biotin) | unknown | not set |", report)
         self.assertIn("| Vitamin D | unknown | unknown |", report)
@@ -84,8 +84,8 @@ class NutritionReportingTests(unittest.TestCase):
     def test_daily_report_always_contains_item_metrics_meal_subtotals_and_daily_progress(self):
         report = tracker.render_daily_report(self.ledger(), "2026-08-30", view="panel")
 
-        self.assertIn("| Breakfast | Eggs (Farm) | 2 large | 140 kcal | 12.00 g | 1.00 g | 10.00 g | 0.00 g |", report)
-        self.assertIn("| Lunch | Mystery soup | 1 bowl | 250 kcal | unknown | unknown | unknown | unknown |", report)
+        self.assertIn("| Breakfast | Eggs (Farm) | 2 large | 140 kcal | 12.00 g | 1.00 g | 10.00 g | 0.00 g | unknown |", report)
+        self.assertIn("| Lunch | Mystery soup | 1 bowl | 250 kcal | unknown | unknown | unknown | unknown | unknown |", report)
         self.assertIn("| Carbs | 13.00 g | 13.00 g / 170.00 g (157.00 g remaining) |", report)
         self.assertIn("| Fat | 10.40 g | 10.40 g / 65.00 g (54.60 g remaining) |", report)
         self.assertIn("| Fiber | 2.40 g | 2.40 g / 30.00 g (27.60 g remaining) |", report)
@@ -94,10 +94,19 @@ class NutritionReportingTests(unittest.TestCase):
         report = tracker.render_daily_report(self.ledger(), "2026-08-30", view="foods")
 
         self.assertIn("Daily Totals\n| Metric | Amount | Target |", report)
-        self.assertIn("| Breakfast | Eggs (Farm) | 2 large | 140 kcal | 12.00 g | 1.00 g | 10.00 g | 0.00 g |", report)
-        self.assertIn("| Lunch | Mystery soup | 1 bowl | 250 kcal | unknown | unknown | unknown | unknown |", report)
-        self.assertIn("| Hydration | 473 mL (16.0 fl oz) | tracked drinking water |", report)
+        self.assertIn("| Breakfast | Eggs (Farm) | 2 large | 140 kcal | 12.00 g | 1.00 g | 10.00 g | 0.00 g | unknown |", report)
+        self.assertIn("| Lunch | Mystery soup | 1 bowl | 250 kcal | unknown | unknown | unknown | unknown | unknown |", report)
+        self.assertIn("| Hydration | 473 mL (16.0 fl oz) | drinks + food water |", report)
         self.assertNotIn("Micronutrients\n", report)
+
+    def test_food_water_is_added_to_hydration(self):
+        ledger = self.ledger()
+        ledger["entries"][0]["water_g"] = 80
+
+        report = tracker.render_daily_report(ledger, "2026-08-30", view="foods")
+
+        self.assertIn("| Hydration | 553 mL (18.7 fl oz) | drinks + food water |", report)
+        self.assertIn("| Snacks | Kiwi \\| gold | 80 g weighed | 49 kcal | 0.90 g | 12.00 g | 0.40 g | 2.40 g | 80.00 g |", report)
 
     def test_cli_today_resolves_to_the_configured_local_date_for_read_only_reports(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -135,8 +144,8 @@ class NutritionReportingTests(unittest.TestCase):
         report = tracker.render_daily_report(ledger, "2026-08-31", view="panel")
 
         self.assertIn("| Entries | 0 | active foods only |", report)
-        self.assertIn("| Hydration | unknown | tracked drinking water |", report)
-        self.assertIn("| - | No foods logged | - | unknown | unknown | unknown | unknown | unknown |", report)
+        self.assertIn("| Hydration | unknown | drinks + food water |", report)
+        self.assertIn("| - | No foods logged | - | unknown | unknown | unknown | unknown | unknown | unknown |", report)
         self.assertIn("| Calories | unknown | 0 kcal / 1,900 kcal (1,900 kcal remaining) |", report)
 
     def test_invalid_report_view_is_rejected(self):
