@@ -1,4 +1,5 @@
 import importlib.util
+import json
 from pathlib import Path
 from unittest import mock
 import unittest
@@ -58,6 +59,18 @@ class ReleaseWorkflowTests(unittest.TestCase):
             release_workflow.validate_tag_release_options(push=False, create_release=True)
 
         release_workflow.validate_tag_release_options(push=True, create_release=True)
+
+    def test_review_gate_fails_on_copilot_recommendations(self) -> None:
+        response = {"headRefOid": "abc", "reviews": [{"author": {"login": "copilot-pull-request-reviewer"}, "commit": {"oid": "abc"}, "submittedAt": "2026-09-02T00:00:00Z", "body": "### Changes recommended"}]}
+        with mock.patch("subprocess.run", return_value=mock.Mock(stdout=json.dumps(response))):
+            with self.assertRaisesRegex(ValueError, "recommends changes"):
+                release_workflow.wait_for_copilot_review("1", wait_minutes=0, poll_seconds=0)
+
+    def test_review_gate_rejects_review_for_old_head(self) -> None:
+        response = {"headRefOid": "new", "reviews": [{"author": {"login": "copilot-pull-request-reviewer"}, "commit": {"oid": "old"}, "body": ""}]}
+        with mock.patch("subprocess.run", return_value=mock.Mock(stdout=json.dumps(response))):
+            with self.assertRaisesRegex(TimeoutError, "did not complete"):
+                release_workflow.wait_for_copilot_review("1", wait_minutes=0, poll_seconds=0)
 
 
 if __name__ == "__main__":

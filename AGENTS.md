@@ -18,9 +18,15 @@ For every pull request:
    python3 -m unittest discover -s tests
    ```
 
-3. Open the PR and wait for CI plus Copilot review.
-4. If Copilot requests changes, resolve them at engineering discretion, rerun tests, push, and request another review.
-5. Merge only after CI is green and Copilot has no unresolved requested changes. If repository policy blocks a normal merge after review feedback is resolved, the maintainer-approved admin merge path is acceptable.
+3. Open the PR and wait for CI plus Copilot review. After pushing the PR head, run the asynchronous Copilot gate and wait for its result:
+
+   ```bash
+   python3 scripts/release_workflow.py wait-pr-review --pr <PR_NUMBER> --wait-minutes 5
+   ```
+
+   This must observe a Copilot review on the current PR head. It fails closed if Copilot recommends changes or if no review arrives within the timeout. Never infer review completion from green CI, an empty review list, or elapsed time.
+4. If Copilot requests changes, resolve them at engineering discretion, rerun tests, push, and request another review by repeating the review gate for the new head.
+5. Merge only after CI is green and the review gate has passed with no unresolved requested changes. If repository policy blocks a normal merge after review feedback is resolved, the maintainer-approved admin merge path is acceptable.
 6. After merge, update local `main`, create the matching release tag, and push it:
 
    ```bash

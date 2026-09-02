@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.9 - 2026-09-02
+
+- Require asynchronous Copilot review before merge and release.
+
 ## 1.2.8 - 2026-09-02
 
 - Harden catalogue validation and clean nutrition examples.
