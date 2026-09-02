@@ -116,11 +116,11 @@ Daily Totals
 | Carbs | <amount> | <target progress or not set> |
 | Fat | <amount> | <target progress or not set> |
 | Fiber | <amount> | <target progress or not set> |
-| Hydration | <mL and fl oz or unknown> | tracked drinking water |
+| Hydration | <mL and fl oz or unknown> | drinks + food water |
 
 Foods
-| Meal | Food | Amount | Calories | Protein | Carbs | Fat | Fiber |
-| --- | --- | --- | --- | --- | --- | --- | --- |
+| Meal | Food | Amount | Calories | Protein | Carbs | Fat | Fiber | Water Added |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
 
 Micronutrients
 | Nutrient | Amount | DRV % |

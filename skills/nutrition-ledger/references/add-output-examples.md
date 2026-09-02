@@ -4,9 +4,9 @@ For one food:
 
 **Logged Food**
 
-| Food | Amount | Calories | Protein | Carbs | Fat | Fiber |
-| --- | --- | ---: | ---: | ---: | ---: | ---: |
-| Whole milk | 128 g | 78 kcal | 4.04 g | 6.13 g | 4.18 g | 0.00 g |
+| Food | Amount | Calories | Protein | Carbs | Fat | Fiber | Water Added |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Whole milk | 128 g | 78 kcal | 4.04 g | 6.13 g | 4.18 g | 0.00 g | 107 g |
 
 **Today So Far**
 
@@ -20,10 +20,10 @@ For multiple foods, use one `Logged Foods` table followed by the full `Today So 
 
 **Logged Foods**
 
-| Meal | Food | Amount | Calories | Protein | Carbs | Fat | Fiber |
-| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
-| Snacks | Aplenty Greek-style spanakopita | 4 oz | 251 kcal | 9.23 g | 30.32 g | 9.23 g | 1.32 g |
-| Snacks | Roasted seaweed snack | 5 g | 30 kcal | 1.00 g | 1.00 g | 2.00 g | 1.00 g |
+| Meal | Food | Amount | Calories | Protein | Carbs | Fat | Fiber | Water Added |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Snacks | Aplenty Greek-style spanakopita | 4 oz | 251 kcal | 9.23 g | 30.32 g | 9.23 g | 1.32 g | unknown |
+| Snacks | Roasted seaweed snack | 5 g | 30 kcal | 1.00 g | 1.00 g | 2.00 g | 1.00 g | unknown |
 
 **Today So Far**
 
@@ -45,9 +45,9 @@ USDA FoodData Central: generic nutrient reference, URL unavailable.
 
 **Logged Food**
 
-| Food | Amount | Calories | Protein | Carbs | Fat | Fiber |
-| --- | --- | ---: | ---: | ---: | ---: | ---: |
-| Whole milk | 128 g | 78 kcal | 4.04 g | 6.13 g | 4.18 g | 0.00 g |
+| Food | Amount | Calories | Protein | Carbs | Fat | Fiber | Water Added |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Whole milk | 128 g | 78 kcal | 4.04 g | 6.13 g | 4.18 g | 0.00 g | 107 g |
 
 **Today So Far**
 
@@ -60,7 +60,7 @@ USDA FoodData Central: generic nutrient reference, URL unavailable.
 | Carbs | 143.73 g | 143.73 / 190 (46.27 remaining) |
 | Fat | 73.24 g | 73.24 / 67 (-6.24 remaining) |
 | Fiber | 13.00 g | 13.00 / 30 (17.00 remaining) |
-| Hydration | 710 mL (24.0 fl oz) | tracked drinking water |
+| Hydration | 817 mL (27.6 fl oz) | drinks + food water |
 
 Target progress: 1,820 / 2,000 kcal; 146.33 / 160 g protein; 143.73 / 190 g carbs; 73.24 / 67 g fat; 13 / 30 g fiber.
 
@@ -68,10 +68,10 @@ Logged and verified.
 
 **Logged Foods**
 
-| Meal | Food | Amount | Calories | Protein | Carbs | Fat | Fiber |
-| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
-| Snacks | Aplenty Greek-style spanakopita | 4 oz | 251 kcal | 9.23 g | 30.32 g | 9.23 g | 1.32 g |
-| Snacks | Roasted seaweed snack | 5 g | 30 kcal | 1.00 g | 1.00 g | 2.00 g | 1.00 g |
+| Meal | Food | Amount | Calories | Protein | Carbs | Fat | Fiber | Water Added |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Snacks | Aplenty Greek-style spanakopita | 4 oz | 251 kcal | 9.23 g | 30.32 g | 9.23 g | 1.32 g | unknown |
+| Snacks | Roasted seaweed snack | 5 g | 30 kcal | 1.00 g | 1.00 g | 2.00 g | 1.00 g | unknown |
 
 **Today So Far**
 
@@ -84,7 +84,7 @@ Logged and verified.
 | Carbs | 175.05 g | 175.05 / 190 (14.95 remaining) |
 | Fat | 84.47 g | 84.47 / 67 (17.47 over) |
 | Fiber | 15.32 g | 15.32 / 30 (14.68 remaining) |
-| Hydration | 710 mL (24.0 fl oz) | tracked drinking water |
+| Hydration | 817 mL (27.6 fl oz) | drinks + food water |
 
 Target progress: 2,101 / 2,000 kcal; 156.56 / 160 g protein; 175.05 / 190 g carbs; 84.47 / 67 g fat; 15.32 / 30 g fiber.
 
@@ -97,9 +97,9 @@ gimMe roasted seaweed snack label/reference, URL unavailable.
 
 **Logged Food**
 
-| Food | Amount | Calories | Protein | Carbs | Fat | Fiber |
-| --- | --- | ---: | ---: | ---: | ---: | ---: |
-| Unbranded bakery pastry | 1 piece | 280 kcal | 4.00 g | 38.00 g | 12.00 g | unknown |
+| Food | Amount | Calories | Protein | Carbs | Fat | Fiber | Water Added |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Unbranded bakery pastry | 1 piece | 280 kcal | 4.00 g | 38.00 g | 12.00 g | unknown | unknown |
 
 **Today So Far**
 
@@ -112,7 +112,7 @@ gimMe roasted seaweed snack label/reference, URL unavailable.
 | Carbs | 213.05 g | 23.05 over |
 | Fat | 94.47 g | 27.47 over |
 | Fiber | 15.32 g | 14.68 remaining |
-| Hydration | 710 mL (24.0 fl oz) | tracked drinking water |
+| Hydration | 817 mL (27.6 fl oz) | drinks + food water |
 
 Target progress: Calories, carbs, and fat are over target; protein is met; 14.68 g fiber remain.
 
